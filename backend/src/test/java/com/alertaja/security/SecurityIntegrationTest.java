@@ -2,8 +2,14 @@ package com.alertaja.security;
 
 import com.alertaja.dto.LoginRequest;
 import com.alertaja.dto.RegisterRequest;
+import com.alertaja.enums.NivelRisco;
 import com.alertaja.enums.RoleUsuario;
+import com.alertaja.enums.TipoSensor;
+import com.alertaja.model.Regiao;
+import com.alertaja.model.Sensor;
 import com.alertaja.model.Usuario;
+import com.alertaja.repository.RegiaoRepository;
+import com.alertaja.repository.SensorRepository;
 import com.alertaja.repository.UsuarioRepository;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -19,6 +25,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigDecimal;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -42,6 +50,12 @@ class SecurityIntegrationTest {
     private UsuarioRepository usuarioRepository;
 
     @Autowired
+    private RegiaoRepository regiaoRepository;
+
+    @Autowired
+    private SensorRepository sensorRepository;
+
+    @Autowired
     private PasswordEncoder passwordEncoder;
 
     @Autowired
@@ -51,6 +65,7 @@ class SecurityIntegrationTest {
 
     private Usuario admin;
     private Usuario cidadao;
+    private Sensor sensorTeste;
     private String tokenAdmin;
     private String tokenCidadao;
 
@@ -68,6 +83,25 @@ class SecurityIntegrationTest {
                 .email("cidadao.comum@alertaja.com")
                 .senha(passwordEncoder.encode("cidadao123456"))
                 .role(RoleUsuario.ROLE_CIDADAO)
+                .build());
+
+        Regiao regiaoTeste = regiaoRepository.save(Regiao.builder()
+                .nome("Região de Segurança")
+                .cidade("São Paulo")
+                .estado("SP")
+                .nivelRiscoAtual(NivelRisco.NORMAL)
+                .ativo(true)
+                .build());
+
+        sensorTeste = sensorRepository.save(Sensor.builder()
+                .regiao(regiaoTeste)
+                .codigoIdentificador("PLUV-SEC-01")
+                .tipo(TipoSensor.PLUVIOMETRO)
+                .unidadeMedida("mm")
+                .limiteAtencao(new BigDecimal("25.00"))
+                .limiteAlerta(new BigDecimal("50.00"))
+                .limitePerigo(new BigDecimal("75.00"))
+                .ativo(true)
                 .build());
 
         tokenAdmin = jwtTokenService.gerarToken(admin.getId(), admin.getEmail(), admin.getNome(), admin.getRole());
@@ -192,12 +226,16 @@ class SecurityIntegrationTest {
     @Test
     @DisplayName("Deve permitir ingestão de telemetria quando o cabeçalho X-Sensor-API-Key for válido")
     void devePermitirIngestaoComApiKeyValida() throws Exception {
+        String payload = String.format("{\"sensorId\": %d, \"valor\": 12.5}", sensorTeste.getId());
+
         mockMvc.perform(post("/api/v1/medicoes")
                 .header("X-Sensor-API-Key", SENSOR_API_KEY_VALIDA)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"sensorId\": 1, \"valor\": 45.2}"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.status").value("sucesso"));
+                .content(payload))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.id").isNotEmpty())
+                .andExpect(jsonPath("$.sensorId").value(sensorTeste.getId()))
+                .andExpect(jsonPath("$.valor").value(12.5));
     }
 
     @Test
