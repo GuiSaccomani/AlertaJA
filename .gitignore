@@ -1,0 +1,30 @@
+# Arquivos de Build
+target/
+*.class
+*.jar
+*.war
+
+# Node & Frontend
+node_modules/
+dist/
+.vite/
+
+# Python & Ambiente Virtual
+__pycache__/
+*.pyc
+venv/
+.env
+
+# IDEs e Editores
+.idea/
+*.iml
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.DS_Store
+
+# Logs
+*.log
