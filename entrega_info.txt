@@ -1,0 +1,74 @@
+================================================================================
+ ALERTAJÁ - SISTEMA DE MONITORAMENTO DE RISCOS DE ALAGAMENTO E TELEMETRIA IoT
+ GLOBAL SOLUTION / ENTREGA ACADÊMICA
+================================================================================
+
+1. IDENTIFICAÇÃO DO PROJETO
+--------------------------------------------------------------------------------
+Nome da Solução: AlertaJá
+Repositório GitHub: https://github.com/GuiSaccomani/AlertaJA.git
+Branch Principal: master
+
+2. DADOS DA TURMA E INSTITUIÇÃO
+--------------------------------------------------------------------------------
+Instituição de Ensino: FIAP
+Curso: [INFORME SEU CURSO AQUI - Ex: Engenharia de Software / Análise e Desenvolvimento de Sistemas]
+Turma: [INFORME SUA TURMA AQUI - Ex: 2TDSR / 3ES]
+Ano/Semestre: 2026 / 1º Semestre
+
+3. INTEGRANTES DO GRUPO
+--------------------------------------------------------------------------------
+* Integrante 1:
+  Nome: [INFORME O NOME COMPLETO DO INTEGRANTE 1]
+  RM: [INFORME O RM DO INTEGRANTE 1]
+
+* Integrante 2:
+  Nome: [INFORME O NOME COMPLETO DO INTEGRANTE 2]
+  RM: [INFORME O RM DO INTEGRANTE 2]
+
+* Integrante 3:
+  Nome: [INFORME O NOME COMPLETO DO INTEGRANTE 3]
+  RM: [INFORME O RM DO INTEGRANTE 3]
+
+* Integrante 4:
+  Nome: [INFORME O NOME COMPLETO DO INTEGRANTE 4]
+  RM: [INFORME O RM DO INTEGRANTE 4]
+
+* Integrante 5:
+  Nome: [INFORME O NOME COMPLETO DO INTEGRANTE 5]
+  RM: [INFORME O RM DO INTEGRANTE 5]
+
+4. LINK DO VÍDEO DE APRESENTAÇÃO E PITCH DA SOLUÇÃO
+--------------------------------------------------------------------------------
+Link do Vídeo (YouTube / Loom / Google Drive):
+[COLE AQUI O LINK DO VÍDEO DE DEMONSTRAÇÃO E PITCH]
+
+(Aviso: Certifique-se de que o vídeo esteja configurado como 'Não Listado' ou 'Público')
+
+5. RESUMO TÉCNICO DA ARQUITETURA
+--------------------------------------------------------------------------------
+- Backend: Java 21 LTS, Spring Boot 3.4.3, Spring Data JPA, Spring Security, Flyway, JJWT.
+- Banco de Dados: PostgreSQL (Produção/Dev) / H2 modo PostgreSQL (Testes e Dev Local).
+- Frontend: React 19, TypeScript, Vite, Axios, React Router, Design System Dark Theme.
+- Simulador IoT: Python 3.12, Requests, Dotenv com cenários climáticos controlados.
+- Segurança: RBAC (ROLE_ADMIN e ROLE_CIDADAO), JWT stateless, proteção de telemetria
+  via cabeçalho X-Sensor-API-Key obrigatório.
+
+6. CREDENCIAIS DE DEMONSTRAÇÃO
+--------------------------------------------------------------------------------
+* Administrador:
+  E-mail: admin@alertaja.com
+  Senha:  Admin@123456
+
+* Cidadão:
+  E-mail: cidadao@alertaja.com
+  Senha:  Cidadao@123456
+
+* Chave de Ingestão de Sensores:
+  Variável de Ambiente: SENSOR_INGESTION_API_KEY
+  Exemplo de Testes:   chave-secreta-telemetria-etapa5
+
+================================================================================
+ AVISO LEGAL: PROJETO DE NATUREZA EDUCACIONAL E ACADÊMICA.
+ DADOS METEOROLÓGICOS E HIDROLÓGICOS FICTÍCIOS GERADOS PARA SIMULAÇÃO.
+================================================================================
