@@ -26,7 +26,7 @@ export const App: React.FC = () => {
           <Navbar />
 
           {/* Conteúdo Principal com Rotas */}
-          <main className="main-content">
+          <main className="ccom-main-container">
             <Routes>
               {/* Rota Raiz Redireciona para o Dashboard */}
               <Route path="/" element={<Navigate to="/dashboard" replace />} />

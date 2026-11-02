@@ -3,10 +3,10 @@ import { NivelRisco } from '../types';
 
 interface RiskBadgeProps {
   nivel: NivelRisco;
-  showIcon?: boolean;
+  size?: 'sm' | 'md' | 'lg';
 }
 
-export const RiskBadge: React.FC<RiskBadgeProps> = ({ nivel }) => {
+export const RiskBadge: React.FC<RiskBadgeProps> = ({ nivel, size = 'md' }) => {
   const getClasse = () => {
     switch (nivel) {
       case 'ATENCAO':
@@ -24,19 +24,25 @@ export const RiskBadge: React.FC<RiskBadgeProps> = ({ nivel }) => {
   const getRotulo = () => {
     switch (nivel) {
       case 'ATENCAO':
-        return 'Atenção';
+        return 'ATENÇÃO';
       case 'ALERTA':
-        return 'Alerta';
+        return 'ALERTA';
       case 'PERIGO':
-        return 'Perigo Crítico';
+        return 'PERIGO';
       case 'NORMAL':
       default:
-        return 'Normal';
+        return 'NORMAL';
     }
   };
 
+  const extraStyles: React.CSSProperties = size === 'sm' 
+    ? { fontSize: '0.68rem', padding: '0.15rem 0.45rem' } 
+    : size === 'lg' 
+    ? { fontSize: '0.85rem', padding: '0.35rem 0.85rem' } 
+    : {};
+
   return (
-    <span className={`risk-badge ${getClasse()}`}>
+    <span className={`risk-indicator ${getClasse()}`} style={extraStyles}>
       <span className="risk-dot" />
       {getRotulo()}
     </span>

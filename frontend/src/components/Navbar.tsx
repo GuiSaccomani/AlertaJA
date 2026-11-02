@@ -2,11 +2,11 @@ import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import {
-  Activity,
+  Layers,
   MapPin,
   Cpu,
-  AlertOctagon,
-  ShieldCheck,
+  AlertTriangle,
+  Shield,
   LogOut,
   User,
   LogIn,
@@ -23,45 +23,50 @@ export const Navbar: React.FC = () => {
   };
 
   return (
-    <header className="navbar">
-      <div className="navbar-container">
-        <NavLink to="/" className="brand-logo">
-          <div className="brand-icon">
-            <Activity size={20} />
+    <header className="ccom-navbar">
+      <div className="ccom-nav-container">
+        <NavLink to="/dashboard" className="ccom-brand" title="Centro de Operações AlertaJá">
+          <div className="ccom-brand-radar">
+            <Layers size={16} />
           </div>
-          <span>Alerta<span className="brand-highlight">Já</span></span>
+          <div>
+            <div className="ccom-brand-title">
+              ALERTA<span>JÁ</span>
+            </div>
+            <div className="ccom-brand-sub">OPERAÇÕES HIDROLÓGICAS</div>
+          </div>
         </NavLink>
 
-        <nav>
-          <ul className="nav-links">
+        <nav aria-label="Navegação Principal">
+          <ul className="ccom-nav-links">
             <li>
-              <NavLink to="/dashboard" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
-                <Activity size={16} />
+              <NavLink to="/dashboard" className={({ isActive }) => `ccom-nav-item ${isActive ? 'active' : ''}`}>
+                <Layers size={14} />
                 Dashboard
               </NavLink>
             </li>
             <li>
-              <NavLink to="/regioes" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
-                <MapPin size={16} />
+              <NavLink to="/regioes" className={({ isActive }) => `ccom-nav-item ${isActive ? 'active' : ''}`}>
+                <MapPin size={14} />
                 Regiões
               </NavLink>
             </li>
             <li>
-              <NavLink to="/alertas" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
-                <AlertOctagon size={16} />
+              <NavLink to="/alertas" className={({ isActive }) => `ccom-nav-item ${isActive ? 'active' : ''}`}>
+                <AlertTriangle size={14} />
                 Central de Alertas
               </NavLink>
             </li>
             <li>
-              <NavLink to="/sensores" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
-                <Cpu size={16} />
-                Sensores
+              <NavLink to="/sensores" className={({ isActive }) => `ccom-nav-item ${isActive ? 'active' : ''}`}>
+                <Cpu size={14} />
+                Sensores IoT
               </NavLink>
             </li>
             {isAdmin && (
               <li>
-                <NavLink to="/admin" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
-                  <ShieldCheck size={16} />
+                <NavLink to="/admin" className={({ isActive }) => `ccom-nav-item ${isActive ? 'active' : ''}`}>
+                  <Shield size={14} />
                   Administração
                 </NavLink>
               </li>
@@ -69,30 +74,34 @@ export const Navbar: React.FC = () => {
           </ul>
         </nav>
 
-        <div className="nav-user-section">
+        <div className="ccom-user-panel">
           {isAuthenticated && usuario ? (
             <>
-              <div className="user-badge">
-                <User size={15} style={{ color: 'var(--text-muted)' }} />
-                <span>{usuario.nome.split(' ')[0]}</span>
-                <span className={`user-role-tag ${isAdmin ? 'role-admin' : 'role-cidadao'}`}>
-                  {isAdmin ? 'Admin' : 'Cidadão'}
+              <div className="ccom-user-status">
+                <User size={13} style={{ color: 'var(--text-tertiary)' }} />
+                <span style={{ fontWeight: 500 }}>{usuario.nome.split(' ')[0]}</span>
+                <span className={`ccom-role-badge ${isAdmin ? 'ccom-role-admin' : 'ccom-role-cidadao'}`}>
+                  {isAdmin ? 'ADMIN' : 'CIDADÃO'}
                 </span>
               </div>
-              <button onClick={handleLogout} className="btn btn-secondary btn-sm" title="Encerrar Sessão">
-                <LogOut size={15} />
+              <button
+                onClick={handleLogout}
+                className="btn btn-secondary btn-sm"
+                title="Encerrar Sessão Segura"
+              >
+                <LogOut size={13} />
                 Sair
               </button>
             </>
           ) : (
-            <div style={{ display: 'flex', gap: '0.5rem' }}>
+            <div style={{ display: 'flex', gap: '0.4rem' }}>
               <NavLink to="/login" className="btn btn-secondary btn-sm">
-                <LogIn size={15} />
+                <LogIn size={13} />
                 Entrar
               </NavLink>
               <NavLink to="/cadastro" className="btn btn-primary btn-sm">
-                <UserPlus size={15} />
-                Criar Conta
+                <UserPlus size={13} />
+                Cadastro
               </NavLink>
             </div>
           )}

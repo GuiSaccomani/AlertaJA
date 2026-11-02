@@ -1,14 +1,22 @@
 import React from 'react';
-import { AlertTriangle } from 'lucide-react';
+import { AlertCircle, Radio } from 'lucide-react';
 
 export const DisclaimerBanner: React.FC = () => {
   return (
-    <div className="disclaimer-banner">
-      <span className="disclaimer-tag">Ambiente Acadêmico</span>
-      <AlertTriangle size={15} style={{ verticalAlign: 'middle' }} />
-      <span>
-        <strong>AVISO:</strong> Plataforma de demonstração com telemetria e leituras simuladas. Não representa alertas oficiais da Defesa Civil.
-      </span>
-    </div>
+    <aside className="ccom-banner" role="complementary" aria-label="Aviso Legal de Simulação">
+      <div className="ccom-banner-left">
+        <span className="ccom-tag-amber">PROTOCOLO SIMULADO</span>
+        <AlertCircle size={13} style={{ color: '#facc15' }} />
+        <span>
+          <strong>AMBIENTE DE SIMULAÇÃO EDUCATIVA | DADOS FICTÍCIOS | NÃO UTILIZAR COMO DEFESA CIVIL OFICIAL</strong>
+        </span>
+      </div>
+      <div className="ccom-banner-right">
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+          <Radio size={12} style={{ color: 'var(--cyan-telemetry)' }} />
+          CANAL DE TELEMETRIA IoT ATIVO
+        </span>
+      </div>
+    </aside>
   );
 };

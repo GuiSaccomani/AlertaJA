@@ -1,17 +1,22 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { sensorService, regiaoService } from '../services/api';
 import { Sensor, Regiao } from '../types';
+import { animatePageEnter } from '../utils/motion';
 import {
   Cpu,
   MapPin,
   Clock,
   Filter,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  RefreshCw,
+  Droplets,
+  Waves
 } from 'lucide-react';
 
 export const Sensores: React.FC = () => {
+  const containerRef = useRef<HTMLDivElement>(null);
   const [sensores, setSensores] = useState<Sensor[]>([]);
   const [regioes, setRegioes] = useState<Regiao[]>([]);
   const [regiaoFiltroId, setRegiaoFiltroId] = useState<string>('');
@@ -20,6 +25,12 @@ export const Sensores: React.FC = () => {
   const [totalPaginas, setTotalPaginas] = useState(1);
   const [totalElementos, setTotalElementos] = useState(0);
   const [carregando, setCarregando] = useState(true);
+
+  useEffect(() => {
+    if (containerRef.current) {
+      animatePageEnter(containerRef.current);
+    }
+  }, []);
 
   useEffect(() => {
     const carregarRegioes = async () => {
@@ -58,34 +69,45 @@ export const Sensores: React.FC = () => {
   }, [pagina, regiaoFiltroId, apenasAtivos]);
 
   return (
-    <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
+    <div ref={containerRef} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+      {/* Cabeçalho */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem', paddingBottom: '0.75rem', borderBottom: '1px solid var(--border-subtle)' }}>
         <div>
-          <h1 style={{ fontSize: '1.75rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
-            <Cpu size={26} style={{ color: 'var(--secondary)' }} />
-            Rede de Sensores IoT
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.2rem' }}>
+            <span style={{ fontSize: '0.72rem', fontFamily: 'var(--font-mono)', color: 'var(--cyan-telemetry)', letterSpacing: '0.08em' }}>
+              IOT.NETWORK // ESTAÇÕES-TELEMÉTRICAS
+            </span>
+          </div>
+          <h1 style={{ fontSize: '1.6rem', fontWeight: 700, margin: 0, letterSpacing: '-0.02em' }}>
+            Inventário da Rede de Sensores IoT
           </h1>
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>
-            Dispositivos pluviométricos e fluviométricos instalados nas bacias monitoradas
+          <p style={{ color: 'var(--text-secondary)', fontSize: '0.82rem', marginTop: '0.2rem' }}>
+            Estações pluviométricas e sensores de cota fluvial em monitoramento de campo
           </p>
         </div>
+
+        <button onClick={carregarSensores} className="btn btn-secondary btn-sm" disabled={carregando}>
+          <RefreshCw size={12} className={carregando ? 'spinner-op' : ''} />
+          Atualizar Lista
+        </button>
       </div>
 
-      {/* Painel de Filtros */}
-      <div className="card" style={{ marginBottom: '1.5rem', padding: '1rem 1.25rem' }}>
+      {/* Barra de Filtros */}
+      <div className="panel" style={{ padding: '0.85rem 1.25rem' }}>
         <div style={{ display: 'flex', gap: '1.25rem', alignItems: 'center', flexWrap: 'wrap' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
-            <Filter size={16} />
-            <strong>Filtrar por:</strong>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', color: 'var(--text-tertiary)', fontSize: '0.75rem', fontFamily: 'var(--font-display)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+            <Filter size={14} style={{ color: 'var(--cyan-telemetry)' }} />
+            Filtrar Bacia:
           </div>
 
-          <div style={{ minWidth: '240px' }}>
+          <div style={{ minWidth: '260px' }}>
             <select
-              className="select"
+              className="form-select"
+              style={{ width: '100%', padding: '0.4rem 0.65rem', fontSize: '0.8rem' }}
               value={regiaoFiltroId}
               onChange={(e) => { setRegiaoFiltroId(e.target.value); setPagina(0); }}
             >
-              <option value="">Todas as Regiões</option>
+              <option value="">Todas as Bacias Hidrográficas</option>
               {regioes.map((r) => (
                 <option key={r.id} value={r.id}>
                   {r.nome} ({r.cidade}/{r.estado})
@@ -94,37 +116,43 @@ export const Sensores: React.FC = () => {
             </select>
           </div>
 
-          <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.88rem', color: 'var(--text-muted)', cursor: 'pointer' }}>
+          <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem', color: 'var(--text-secondary)', cursor: 'pointer', marginLeft: 'auto' }}>
             <input
               type="checkbox"
               checked={apenasAtivos}
               onChange={(e) => { setApenasAtivos(e.target.checked); setPagina(0); }}
+              style={{ accentColor: 'var(--cyan-telemetry)' }}
             />
-            Apenas sensores ativos
+            Ocultar sensores inativos
           </label>
         </div>
       </div>
 
       {/* Tabela de Sensores */}
-      <div className="card">
+      <div className="panel" style={{ padding: 0 }}>
         {carregando ? (
-          <div style={{ display: 'flex', justifyContent: 'center', padding: '3rem' }}>
-            <div className="spinner" />
+          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '3.5rem', gap: '0.75rem', color: 'var(--text-tertiary)' }}>
+            <div className="spinner-op" />
+            <span style={{ fontSize: '0.82rem' }}>Verificando integridade da rede IoT...</span>
           </div>
         ) : sensores.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '3rem 1rem', color: 'var(--text-muted)' }}>
-            <p>Nenhum sensor encontrado para os filtros selecionados.</p>
+          <div style={{ textAlign: 'center', padding: '3.5rem 1rem', color: 'var(--text-tertiary)' }}>
+            <Cpu size={36} style={{ color: 'var(--border-default)', margin: '0 auto 0.5rem' }} />
+            <p style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '0.9rem' }}>Nenhum sensor encontrado</p>
+            <p style={{ fontSize: '0.75rem', color: 'var(--text-dim)', marginTop: '0.2rem' }}>
+              Altere o filtro de bacia ou habilite a exibição de estações inativas.
+            </p>
           </div>
         ) : (
-          <div className="table-container">
-            <table className="table">
+          <div className="table-wrapper" style={{ border: 'none' }}>
+            <table className="op-table">
               <thead>
                 <tr>
-                  <th>Código Identificador</th>
-                  <th>Tipo</th>
-                  <th>Região Vinculada</th>
-                  <th>Limiares de Risco</th>
-                  <th>Última Telemetria</th>
+                  <th>Código de Estação</th>
+                  <th>Modalidade de Coleta</th>
+                  <th>Bacia de Drenagem</th>
+                  <th>Régua de Limiares (Atenção / Alerta / Perigo)</th>
+                  <th>Última Transmissão</th>
                   <th>Status</th>
                 </tr>
               </thead>
@@ -132,41 +160,44 @@ export const Sensores: React.FC = () => {
                 {sensores.map((s) => (
                   <tr key={s.id}>
                     <td>
-                      <code style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--primary)' }}>
+                      <code style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--cyan-telemetry)' }}>
                         {s.codigoIdentificador}
                       </code>
                     </td>
                     <td>
-                      <span style={{ fontWeight: 600 }}>
-                        {s.tipo === 'PLUVIOMETRO' ? '🌧️ Pluviômetro' : '🌊 Nível da Água'}
-                      </span>
-                      <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', fontWeight: 500, fontSize: '0.82rem', color: 'var(--text-pure)' }}>
+                        {s.tipo === 'PLUVIOMETRO' ? <Droplets size={13} style={{ color: '#38bdf8' }} /> : <Waves size={13} style={{ color: '#06b6d4' }} />}
+                        {s.tipo === 'PLUVIOMETRO' ? 'Pluviômetro' : 'Nível da Calha'}
+                      </div>
+                      <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)', fontFamily: 'var(--font-mono)' }}>
                         Unidade: {s.unidadeMedida}
                       </div>
                     </td>
                     <td>
-                      <Link to={`/regioes/${s.regiaoId}`} style={{ color: 'var(--text-main)', textDecoration: 'none', fontWeight: 500 }}>
-                        <MapPin size={13} style={{ display: 'inline', marginRight: '0.3rem', color: 'var(--primary)' }} />
+                      <Link to={`/regioes/${s.regiaoId}`} style={{ color: 'var(--text-primary)', textDecoration: 'none', fontWeight: 500 }}>
+                        <MapPin size={12} style={{ display: 'inline', marginRight: '0.3rem', color: 'var(--text-tertiary)' }} />
                         {s.nomeRegiao}
                       </Link>
                     </td>
                     <td>
-                      <div style={{ fontSize: '0.8rem', display: 'flex', gap: '0.75rem' }}>
+                      <div style={{ display: 'flex', gap: '0.65rem', fontFamily: 'var(--font-mono)', fontSize: '0.75rem' }}>
                         <span style={{ color: 'var(--risk-atencao)' }}>
-                          Atenção: <strong>&ge; {s.limiteAtencao}</strong>
+                          &ge; {s.limiteAtencao}
                         </span>
+                        <span style={{ color: 'var(--text-dim)' }}>|</span>
                         <span style={{ color: 'var(--risk-alerta)' }}>
-                          Alerta: <strong>&ge; {s.limiteAlerta}</strong>
+                          &ge; {s.limiteAlerta}
                         </span>
-                        <span style={{ color: 'var(--risk-perigo)' }}>
-                          Perigo: <strong>&ge; {s.limitePerigo}</strong>
+                        <span style={{ color: 'var(--text-dim)' }}>|</span>
+                        <span style={{ color: 'var(--risk-perigo)', fontWeight: 700 }}>
+                          &ge; {s.limitePerigo} {s.unidadeMedida}
                         </span>
                       </div>
                     </td>
-                    <td style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>
+                    <td style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', fontFamily: 'var(--font-mono)' }}>
                       {s.ultimaLeitura ? (
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-                          <Clock size={13} />
+                          <Clock size={12} style={{ color: 'var(--text-tertiary)' }} />
                           {new Date(s.ultimaLeitura).toLocaleString('pt-BR')}
                         </div>
                       ) : (
@@ -175,14 +206,15 @@ export const Sensores: React.FC = () => {
                     </td>
                     <td>
                       <span style={{
-                        fontSize: '0.75rem',
+                        fontSize: '0.68rem',
+                        fontFamily: 'var(--font-mono)',
                         fontWeight: 600,
-                        padding: '0.2rem 0.5rem',
-                        borderRadius: '4px',
-                        background: s.ativo ? 'rgba(16, 185, 129, 0.15)' : 'rgba(239, 68, 68, 0.15)',
+                        padding: '0.15rem 0.45rem',
+                        borderRadius: '2px',
+                        background: s.ativo ? 'rgba(16, 185, 129, 0.12)' : 'rgba(239, 68, 68, 0.12)',
                         color: s.ativo ? 'var(--risk-normal)' : 'var(--risk-perigo)'
                       }}>
-                        {s.ativo ? 'Ativo' : 'Desativado'}
+                        {s.ativo ? 'OPERACIONAL' : 'DESATIVADO'}
                       </span>
                     </td>
                   </tr>
@@ -194,22 +226,24 @@ export const Sensores: React.FC = () => {
 
         {/* Paginação */}
         {totalPaginas > 1 && (
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '1.25rem', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-            <span>Mostrando página {pagina + 1} de {totalPaginas} ({totalElementos} sensores)</span>
-            <div style={{ display: 'flex', gap: '0.5rem' }}>
+          <div className="pagination-bar">
+            <span>
+              Mostrando página {pagina + 1} de {totalPaginas} ({totalElementos} sensores)
+            </span>
+            <div className="pagination-controls">
               <button
                 className="btn btn-secondary btn-sm"
                 onClick={() => setPagina((p) => Math.max(0, p - 1))}
                 disabled={pagina === 0}
               >
-                <ChevronLeft size={16} /> Anterior
+                <ChevronLeft size={13} /> Anterior
               </button>
               <button
                 className="btn btn-secondary btn-sm"
                 onClick={() => setPagina((p) => Math.min(totalPaginas - 1, p + 1))}
                 disabled={pagina >= totalPaginas - 1}
               >
-                Próxima <ChevronRight size={16} />
+                Próxima <ChevronRight size={13} />
               </button>
             </div>
           </div>

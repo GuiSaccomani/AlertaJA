@@ -1,21 +1,25 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { alertaService } from '../services/api';
 import { Alerta, NivelRisco, StatusAlerta } from '../types';
 import { useAuth } from '../context/AuthContext';
 import { RiskBadge } from '../components/RiskBadge';
+import { animatePageEnter } from '../utils/motion';
 import {
-  AlertOctagon,
+  AlertTriangle,
   CheckCircle,
   Filter,
   ChevronLeft,
   ChevronRight,
   ShieldCheck,
-  Check
+  Check,
+  RefreshCw,
+  Search
 } from 'lucide-react';
 
 export const Alertas: React.FC = () => {
   const { isAdmin } = useAuth();
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const [alertas, setAlertas] = useState<Alerta[]>([]);
   const [filtroNivel, setFiltroNivel] = useState<string>('');
@@ -50,18 +54,24 @@ export const Alertas: React.FC = () => {
   };
 
   useEffect(() => {
+    if (containerRef.current) {
+      animatePageEnter(containerRef.current);
+    }
+  }, []);
+
+  useEffect(() => {
     carregarAlertas();
   }, [pagina, filtroNivel, filtroStatus, apenasAtivos]);
 
   const handleResolverManual = async (id: number) => {
-    if (!window.confirm(`Deseja realmente marcar o Alerta #${id} como resolvido manualmente?`)) {
+    if (!window.confirm(`Confirma a resolução manual do Alerta #${id}? Esta ação será registrada no histórico de auditoria.`)) {
       return;
     }
 
     setProcessandoResolucaoId(id);
     try {
       await alertaService.resolverManualmente(id);
-      setMensagemSucesso(`Alerta #${id} resolvido com sucesso.`);
+      setMensagemSucesso(`Incidente #${id} resolvido com sucesso.`);
       setTimeout(() => setMensagemSucesso(null), 3000);
       carregarAlertas();
     } catch (err: any) {
@@ -75,19 +85,19 @@ export const Alertas: React.FC = () => {
     switch (status) {
       case 'ATIVO':
         return (
-          <span style={{ fontSize: '0.75rem', fontWeight: 700, padding: '0.2rem 0.5rem', borderRadius: '4px', background: 'rgba(239, 68, 68, 0.2)', color: '#f87171', border: '1px solid rgba(239, 68, 68, 0.4)' }}>
+          <span style={{ fontSize: '0.68rem', fontFamily: 'var(--font-mono)', fontWeight: 700, padding: '0.15rem 0.45rem', borderRadius: '2px', background: 'rgba(239, 68, 68, 0.15)', color: '#fca5a5', border: '1px solid rgba(239, 68, 68, 0.4)' }}>
             EM ABERTO
           </span>
         );
       case 'RESOLVIDO_AUTO':
         return (
-          <span style={{ fontSize: '0.75rem', fontWeight: 700, padding: '0.2rem 0.5rem', borderRadius: '4px', background: 'rgba(16, 185, 129, 0.15)', color: '#34d399', border: '1px solid rgba(16, 185, 129, 0.3)' }}>
+          <span style={{ fontSize: '0.68rem', fontFamily: 'var(--font-mono)', fontWeight: 600, padding: '0.15rem 0.45rem', borderRadius: '2px', background: 'rgba(16, 185, 129, 0.12)', color: '#6ee7b7', border: '1px solid rgba(16, 185, 129, 0.3)' }}>
             RESOLVIDO (AUTO)
           </span>
         );
       case 'RESOLVIDO_MANUAL':
         return (
-          <span style={{ fontSize: '0.75rem', fontWeight: 700, padding: '0.2rem 0.5rem', borderRadius: '4px', background: 'rgba(59, 130, 246, 0.15)', color: '#60a5fa', border: '1px solid rgba(59, 130, 246, 0.3)' }}>
+          <span style={{ fontSize: '0.68rem', fontFamily: 'var(--font-mono)', fontWeight: 600, padding: '0.15rem 0.45rem', borderRadius: '2px', background: 'rgba(2, 132, 199, 0.15)', color: '#38bdf8', border: '1px solid rgba(2, 132, 199, 0.35)' }}>
             RESOLVIDO (MANUAL)
           </span>
         );
@@ -95,41 +105,52 @@ export const Alertas: React.FC = () => {
   };
 
   return (
-    <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
+    <div ref={containerRef} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+      {/* Cabeçalho Operacional da Página */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem', paddingBottom: '0.75rem', borderBottom: '1px solid var(--border-subtle)' }}>
         <div>
-          <h1 style={{ fontSize: '1.75rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
-            <AlertOctagon size={26} style={{ color: 'var(--risk-alerta)' }} />
-            Central de Alertas e Ocorrências
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.2rem' }}>
+            <span style={{ fontSize: '0.72rem', fontFamily: 'var(--font-mono)', color: 'var(--cyan-telemetry)', letterSpacing: '0.08em' }}>
+              INCIDENT.MANAGEMENT // LOG-DE-EVENTOS
+            </span>
+          </div>
+          <h1 style={{ fontSize: '1.6rem', fontWeight: 700, margin: 0, letterSpacing: '-0.02em' }}>
+            Central Integrada de Alertas e Ocorrências
           </h1>
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>
-            Acompanhamento, rastreabilidade e histórico dos incidentes detectados pelo motor de alertas
+          <p style={{ color: 'var(--text-secondary)', fontSize: '0.82rem', marginTop: '0.2rem' }}>
+            Registro cronológico e rastreabilidade dos alertas emitidos pelo motor hidrológico
           </p>
         </div>
+
+        <button onClick={carregarAlertas} className="btn btn-secondary btn-sm" disabled={carregando}>
+          <RefreshCw size={12} className={carregando ? 'spinner-op' : ''} />
+          Atualizar Lista
+        </button>
       </div>
 
       {mensagemSucesso && (
-        <div className="alert-box alert-box-success">
-          <CheckCircle size={18} />
+        <div className="status-banner status-banner-success">
+          <CheckCircle size={15} />
           <span>{mensagemSucesso}</span>
         </div>
       )}
 
-      {/* Painel de Filtros */}
-      <div className="card" style={{ marginBottom: '1.5rem', padding: '1rem 1.25rem' }}>
+      {/* Barra de Filtros e Seletores Técnicos */}
+      <div className="panel" style={{ padding: '0.85rem 1.25rem' }}>
         <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
-            <Filter size={16} />
-            <strong>Filtros:</strong>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', color: 'var(--text-tertiary)', fontSize: '0.75rem', fontFamily: 'var(--font-display)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+            <Filter size={14} style={{ color: 'var(--cyan-telemetry)' }} />
+            Filtrar Registros:
           </div>
 
-          <div style={{ minWidth: '160px' }}>
+          <div style={{ minWidth: '170px' }}>
             <select
-              className="select"
+              className="form-select"
+              style={{ width: '100%', padding: '0.4rem 0.65rem', fontSize: '0.8rem' }}
               value={filtroNivel}
               onChange={(e) => { setFiltroNivel(e.target.value); setPagina(0); }}
             >
-              <option value="">Todos os Níveis</option>
+              <option value="">Todos os Níveis de Risco</option>
               <option value="NORMAL">Normal</option>
               <option value="ATENCAO">Atenção</option>
               <option value="ALERTA">Alerta</option>
@@ -137,84 +158,98 @@ export const Alertas: React.FC = () => {
             </select>
           </div>
 
-          <div style={{ minWidth: '180px' }}>
+          <div style={{ minWidth: '190px' }}>
             <select
-              className="select"
+              className="form-select"
+              style={{ width: '100%', padding: '0.4rem 0.65rem', fontSize: '0.8rem' }}
               value={filtroStatus}
               onChange={(e) => { setFiltroStatus(e.target.value); setPagina(0); }}
             >
-              <option value="">Todos os Status</option>
-              <option value="ATIVO">Ativo (Em aberto)</option>
-              <option value="RESOLVIDO_AUTO">Resolvido Automaticamente</option>
-              <option value="RESOLVIDO_MANUAL">Resolvido Manualmente</option>
+              <option value="">Todos os Status de Incidente</option>
+              <option value="ATIVO">Apenas Ativos (Em Aberto)</option>
+              <option value="RESOLVIDO_AUTO">Resolvidos pelo Sistema</option>
+              <option value="RESOLVIDO_MANUAL">Resolvidos Manualmente</option>
             </select>
           </div>
 
-          <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.88rem', color: 'var(--text-muted)', cursor: 'pointer' }}>
+          <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem', color: 'var(--text-secondary)', cursor: 'pointer', marginLeft: 'auto' }}>
             <input
               type="checkbox"
               checked={apenasAtivos}
               onChange={(e) => { setApenasAtivos(e.target.checked); setPagina(0); }}
+              style={{ accentColor: 'var(--cyan-telemetry)' }}
             />
-            Apenas alertas ativos
+            Ocultar incidentes encerrados
           </label>
         </div>
       </div>
 
-      {/* Tabela de Alertas */}
-      <div className="card">
+      {/* Tabela de Incidentes */}
+      <div className="panel" style={{ padding: 0 }}>
         {carregando ? (
-          <div style={{ display: 'flex', justifyContent: 'center', padding: '3rem' }}>
-            <div className="spinner" />
+          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '3.5rem', gap: '0.75rem', color: 'var(--text-tertiary)' }}>
+            <div className="spinner-op" />
+            <span style={{ fontSize: '0.82rem' }}>Consultando base de incidentes...</span>
           </div>
         ) : alertas.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '3rem 1rem', color: 'var(--text-muted)' }}>
-            <ShieldCheck size={40} style={{ color: 'var(--risk-normal)', margin: '0 auto 0.75rem' }} />
-            <p style={{ fontWeight: 600, color: 'var(--text-main)' }}>Nenhum alerta encontrado com os filtros selecionados</p>
+          <div style={{ textAlign: 'center', padding: '3.5rem 1rem', color: 'var(--text-tertiary)' }}>
+            <ShieldCheck size={36} style={{ color: 'var(--risk-normal)', margin: '0 auto 0.5rem' }} />
+            <p style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '0.9rem' }}>
+              Nenhum incidente corresponde aos filtros aplicados
+            </p>
+            <p style={{ fontSize: '0.75rem', color: 'var(--text-dim)', marginTop: '0.2rem' }}>
+              Modifique os seletores de nível ou status para expandir a consulta.
+            </p>
           </div>
         ) : (
-          <div className="table-container">
-            <table className="table">
+          <div className="table-wrapper" style={{ border: 'none' }}>
+            <table className="op-table">
               <thead>
                 <tr>
-                  <th>Nível</th>
-                  <th>Região</th>
-                  <th>Sensor</th>
-                  <th>Título & Ocorrência</th>
-                  <th>Status</th>
-                  <th>Emissão / Resolução</th>
-                  {isAdmin && <th style={{ textAlign: 'right' }}>Ação Admin</th>}
+                  <th>Severidade</th>
+                  <th>Bacia / Região</th>
+                  <th>Estação / Sensor</th>
+                  <th>Descrição Técnica do Evento</th>
+                  <th>Situação</th>
+                  <th>Carimbo de Emissão</th>
+                  {isAdmin && <th style={{ textAlign: 'right' }}>Ação de Defesa</th>}
                 </tr>
               </thead>
               <tbody>
                 {alertas.map((alerta) => (
                   <tr key={alerta.id}>
-                    <td><RiskBadge nivel={alerta.nivel} /></td>
                     <td>
-                      <Link to={`/regioes/${alerta.regiaoId}`} style={{ color: 'var(--primary)', fontWeight: 600, textDecoration: 'none' }}>
+                      <RiskBadge nivel={alerta.nivel} size="sm" />
+                    </td>
+                    <td>
+                      <Link to={`/regioes/${alerta.regiaoId}`} style={{ color: 'var(--text-pure)', fontWeight: 600, textDecoration: 'none' }}>
                         {alerta.nomeRegiao}
                       </Link>
                     </td>
                     <td>
-                      <code style={{ fontSize: '0.8rem' }}>{alerta.codigoSensor}</code>
+                      <code style={{ fontSize: '0.78rem', color: 'var(--cyan-telemetry)' }}>
+                        {alerta.codigoSensor}
+                      </code>
                     </td>
                     <td>
-                      <div style={{ fontWeight: 600, color: 'var(--text-main)' }}>{alerta.titulo}</div>
-                      <div style={{ fontSize: '0.78rem', color: 'var(--text-dim)', maxWidth: '320px' }}>
+                      <div style={{ fontWeight: 600, color: 'var(--text-pure)', fontSize: '0.82rem' }}>
+                        {alerta.titulo}
+                      </div>
+                      <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', maxWidth: '380px', marginTop: '0.15rem' }}>
                         {alerta.descricao}
                       </div>
                       {alerta.dataUltimaOcorrencia && alerta.dataUltimaOcorrencia !== alerta.dataEmissao && (
-                        <div style={{ fontSize: '0.75rem', color: 'var(--risk-atencao)', marginTop: '0.2rem' }}>
-                          Última reincidência: {new Date(alerta.dataUltimaOcorrencia).toLocaleString('pt-BR')}
+                        <div style={{ fontSize: '0.7rem', color: 'var(--risk-atencao)', fontFamily: 'var(--font-mono)', marginTop: '0.2rem' }}>
+                          Última leitura acima do limiar: {new Date(alerta.dataUltimaOcorrencia).toLocaleString('pt-BR')}
                         </div>
                       )}
                     </td>
                     <td>{getStatusBadge(alerta.status)}</td>
-                    <td style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                      <div>Emissão: {new Date(alerta.dataEmissao).toLocaleString('pt-BR')}</div>
+                    <td style={{ fontSize: '0.75rem', fontFamily: 'var(--font-mono)', color: 'var(--text-secondary)' }}>
+                      <div>{new Date(alerta.dataEmissao).toLocaleString('pt-BR')}</div>
                       {alerta.dataResolucao && (
-                        <div style={{ color: '#34d399' }}>
-                          Resolução: {new Date(alerta.dataResolucao).toLocaleString('pt-BR')}
+                        <div style={{ color: '#34d399', fontSize: '0.7rem', marginTop: '0.15rem' }}>
+                          Fim: {new Date(alerta.dataResolucao).toLocaleTimeString('pt-BR')}
                         </div>
                       )}
                     </td>
@@ -225,13 +260,14 @@ export const Alertas: React.FC = () => {
                             onClick={() => handleResolverManual(alerta.id)}
                             className="btn btn-secondary btn-sm"
                             disabled={processandoResolucaoId === alerta.id}
-                            title="Resolver manualmente este alerta"
+                            title="Resolver manualmente e cessar alerta"
+                            style={{ padding: '0.25rem 0.55rem', fontSize: '0.72rem' }}
                           >
-                            <Check size={14} style={{ color: 'var(--risk-normal)' }} />
+                            <Check size={12} style={{ color: 'var(--risk-normal)' }} />
                             Resolver
                           </button>
                         ) : (
-                          <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)' }}>Encerrado</span>
+                          <span style={{ fontSize: '0.72rem', color: 'var(--text-dim)', fontFamily: 'var(--font-mono)' }}>ENCERRADO</span>
                         )}
                       </td>
                     )}
@@ -242,24 +278,26 @@ export const Alertas: React.FC = () => {
           </div>
         )}
 
-        {/* Paginação */}
+        {/* Barra de Paginação Operacional */}
         {totalPaginas > 1 && (
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '1.25rem', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-            <span>Mostrando página {pagina + 1} de {totalPaginas} ({totalElementos} alertas)</span>
-            <div style={{ display: 'flex', gap: '0.5rem' }}>
+          <div className="pagination-bar">
+            <span>
+              Registro {pagina * 10 + 1} - {Math.min((pagina + 1) * 10, totalElementos)} de <strong>{totalElementos}</strong> alertas
+            </span>
+            <div className="pagination-controls">
               <button
                 className="btn btn-secondary btn-sm"
                 onClick={() => setPagina((p) => Math.max(0, p - 1))}
                 disabled={pagina === 0}
               >
-                <ChevronLeft size={16} /> Anterior
+                <ChevronLeft size={13} /> Anterior
               </button>
               <button
                 className="btn btn-secondary btn-sm"
                 onClick={() => setPagina((p) => Math.min(totalPaginas - 1, p + 1))}
                 disabled={pagina >= totalPaginas - 1}
               >
-                Próxima <ChevronRight size={16} />
+                Próxima <ChevronRight size={13} />
               </button>
             </div>
           </div>
