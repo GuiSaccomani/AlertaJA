@@ -3,6 +3,9 @@ target/
 *.class
 *.jar
 *.war
+data/
+*.db
+*.mv.db
 
 # Node & Frontend
 node_modules/

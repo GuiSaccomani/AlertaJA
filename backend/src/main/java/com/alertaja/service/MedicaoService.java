@@ -40,8 +40,16 @@ public class MedicaoService {
      */
     @Transactional
     public MedicaoResponse registrarMedicao(MedicaoRequest request) {
-        Sensor sensor = sensorRepository.findById(request.sensorId())
-                .orElseThrow(() -> new ResourceNotFoundException("Sensor não encontrado com ID: " + request.sensorId()));
+        Sensor sensor;
+        if (request.sensorId() != null) {
+            sensor = sensorRepository.findById(request.sensorId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Sensor não encontrado com ID: " + request.sensorId()));
+        } else if (request.sensorCodigo() != null && !request.sensorCodigo().isBlank()) {
+            sensor = sensorRepository.findByCodigoIdentificador(request.sensorCodigo().trim())
+                    .orElseThrow(() -> new ResourceNotFoundException("Sensor não encontrado com código: " + request.sensorCodigo()));
+        } else {
+            throw new RegraNegocioException("É obrigatório informar o sensorId ou o sensorCodigo.");
+        }
 
         if (!sensor.getAtivo()) {
             throw new RegraNegocioException("Sensor inativo (" + sensor.getCodigoIdentificador() + "). Ingestão de medições rejeitada.");

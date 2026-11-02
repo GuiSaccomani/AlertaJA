@@ -19,4 +19,8 @@ public interface RegiaoRepository extends JpaRepository<Regiao, Long> {
     Optional<Regiao> findByIdAndAtivoTrue(Long id);
 
     boolean existsByIdAndAtivoTrue(Long id);
+
+    Optional<Regiao> findByNome(String nome);
+
+    boolean existsByNome(String nome);
 }

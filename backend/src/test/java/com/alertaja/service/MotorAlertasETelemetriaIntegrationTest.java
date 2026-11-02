@@ -338,4 +338,16 @@ class MotorAlertasETelemetriaIntegrationTest {
         long contagemDepois = medicaoRepository.count();
         assertEquals(contagemAntes, contagemDepois, "A medição não deve ter sido persistida devido ao rollback transacional");
     }
+
+    @Test
+    @DisplayName("Deve registrar medição identificando o sensor exclusivamente por seu codigoIdentificador")
+    void deveIngerirMedicaoUtilizandoCodigoIdentificadorDoSensor() {
+        MedicaoRequest request = new MedicaoRequest(null, sensorChuva.getCodigoIdentificador(), new BigDecimal("35.00"), LocalDateTime.now());
+        MedicaoResponse response = medicaoService.registrarMedicao(request);
+
+        assertNotNull(response);
+        assertEquals(sensorChuva.getCodigoIdentificador(), response.codigoSensor());
+        assertEquals(NivelRisco.ATENCAO, response.nivelRiscoDetectado());
+        assertTrue(medicaoRepository.existsById(response.id()));
+    }
 }
