@@ -1,9 +1,8 @@
 ﻿
-using AlertaJa.Api.Data;
 using AlertaJa.Api.DTOs.Auth;
 using AlertaJa.Api.Models;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
+using AlertaJa.Api.Repositories;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -13,16 +12,16 @@ namespace AlertaJa.Api.Services
 {
     public class AuthService
     {
-        private readonly AppDbContext _context;
+        private readonly IUsuarioRepository _usuarios;
         private readonly IPasswordHasher<Usuario> _passwordHasher;
         private readonly IConfiguration _configuration;
 
         public AuthService(
-            AppDbContext context,
+            IUsuarioRepository usuarios,
             IPasswordHasher<Usuario> passwordHasher,
             IConfiguration configuration)
         {
-            _context = context;
+            _usuarios = usuarios;
             _passwordHasher = passwordHasher;
             _configuration = configuration;
         }
@@ -31,8 +30,7 @@ namespace AlertaJa.Api.Services
         {
             var email = dto.Email.Trim();
 
-            var usuario = await _context.Usuarios
-                .FirstOrDefaultAsync(u => u.Email == email);
+            var usuario = await _usuarios.ObterPorEmailAsync(email);
 
             if (usuario == null)
                 throw new UnauthorizedAccessException(

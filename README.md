@@ -51,7 +51,8 @@ flowchart LR
         Security["HTTPS · JWT Bearer · API Key · Roles"]
         API["Controllers (/api)"]
         Engine["Services: Motor de Alertas & Risco Regional"]
-        Data["AppDbContext (EF Core) - Repository/Unit of Work"]
+        Repo["Repositories + Unit of Work"]
+        Data["AppDbContext (EF Core)"]
     end
 
     subgraph Storage["Banco de Dados"]
@@ -66,7 +67,8 @@ flowchart LR
     UI -->|"REST + JWT Bearer (proxy Vite)"| Security
     Security --> API
     API --> Engine
-    Engine --> Data
+    Engine --> Repo
+    Repo --> Data
     Data -->|"SQL parametrizado"| DB
 ```
 
@@ -77,7 +79,7 @@ flowchart LR
 * **Simulador de Sensores:** Python 3 com `requests` e `python-dotenv`, cenários controlados e modo contínuo.
 * **Testes:** Postman Collection com 49 casos e 83 asserções, executada por linha de comando com **Newman** (relatórios HTML/JUnit).
 
-**Camadas da API:** `Controllers` (HTTP, status, autorização) → `Services` (regras de negócio) → `AppDbContext` (EF Core). Cada `DbSet<T>` cumpre o papel de **Repository** e `SaveChangesAsync()` o de **Unit of Work** (medição, alerta e risco da região gravados na mesma transação). Detalhes em [`docs/arquitetura/arquitetura.md`](docs/arquitetura/arquitetura.md).
+**Camadas da API:** `Controllers` (HTTP, status, autorização) → `Services` (regras de negócio) → `Repositories` (acesso a dados, uma interface + implementação por entidade) → `AppDbContext` (EF Core/Oracle). Os Services dependem só das interfaces dos repositórios; o `IUnitOfWork` grava medição, alerta e risco da região numa única transação. Detalhes em [`docs/arquitetura/arquitetura.md`](docs/arquitetura/arquitetura.md).
 
 ---
 
@@ -251,7 +253,7 @@ npm test
 ```
 * Antes, informe a `apiKey` em `tests/AlertaJa.postman_environment.json` (mesmo valor de `ALERTAJA_API_KEY`).
 * **Resultado:** 49 requisições, **83 asserções, 0 falhas** (autenticação, RBAC, validações, CRUD, ingestão IoT, abertura/escalonamento/auto-resolução de alertas, recálculo regional, exclusão).
-* Relatório HTML: `tests/relatorios/ultima-execucao.html`. Execuções de evidência em [`tests/relatorios/`](tests/relatorios/) (`run1` = código original, 45/49; `run2` = após correções, 49/49).
+* Relatório HTML: `tests/relatorios/ultima-execucao.html`. Execuções de evidência em [`tests/relatorios/`](tests/relatorios/) (`run1` = código original, 45/49; `run2` = após correções, 49/49; `run3` = após criar a camada Repository, 49/49).
 * Matriz de cenários: [`docs/testes-e-cenarios/cenarios_de_teste.md`](docs/testes-e-cenarios/cenarios_de_teste.md) · Correções: [`docs/CORRECOES_QA.md`](docs/CORRECOES_QA.md).
 
 ### Frontend (Build):

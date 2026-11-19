@@ -1,6 +1,7 @@
-
+﻿
 using AlertaJa.Api.Data;
 using AlertaJa.Api.Models;
+using AlertaJa.Api.Repositories;
 using AlertaJa.Api.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -41,6 +42,15 @@ builder.Services
 
 builder.Services.AddOpenApi();
 
+// Camada Repository (acesso a dados) + Unit of Work
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
+builder.Services.AddScoped<IRegiaoRepository, RegiaoRepository>();
+builder.Services.AddScoped<ISensorRepository, SensorRepository>();
+builder.Services.AddScoped<IMedicaoRepository, MedicaoRepository>();
+builder.Services.AddScoped<IAlertaRepository, AlertaRepository>();
+
+// Camada Service (regras de negócio)
 builder.Services.AddScoped<RegiaoService>();
 builder.Services.AddScoped<SensorService>();
 builder.Services.AddScoped<MedicaoService>();

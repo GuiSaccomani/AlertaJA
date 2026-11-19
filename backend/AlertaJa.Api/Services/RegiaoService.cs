@@ -1,58 +1,41 @@
-﻿using AlertaJa.Api.Data;
-using AlertaJa.Api.DTOs.Regioes;
+﻿using AlertaJa.Api.DTOs.Regioes;
 using AlertaJa.Api.Models;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
+using AlertaJa.Api.Repositories;
 
 namespace AlertaJa.Api.Services
 {
     public class RegiaoService
     {
-        private readonly AppDbContext _context;
+        private readonly IRegiaoRepository _regioes;
+        private readonly IUnitOfWork _uow;
 
-        public RegiaoService(AppDbContext context)
+        public RegiaoService(IRegiaoRepository regioes, IUnitOfWork uow)
         {
-            _context = context;
+            _regioes = regioes;
+            _uow = uow;
         }
+
+        private static RegiaoResponseDto ParaDto(Regiao r) => new()
+        {
+            Id = r.Id,
+            Nome = r.Nome,
+            Cidade = r.Cidade,
+            Estado = r.Estado,
+            NivelRiscoAtual = r.NivelRiscoAtual,
+            Ativo = r.Ativo, // [CORREÇÃO QA] o PUT não devolvia este campo (sempre false)
+            CriadoEm = r.CriadoEm,
+            AtualizadoEm = r.AtualizadoEm
+        };
 
         // listar todas as regioes
-        public async Task<List<RegiaoResponseDto>> ListarTodas()
-        {
-            return await _context.Regioes
-                .AsNoTracking()
-                .Select(r => new RegiaoResponseDto
-                {
-                    Id = r.Id,
-                    Nome = r.Nome,
-                    Cidade = r.Cidade,
-                    Estado = r.Estado,
-                    NivelRiscoAtual = r.NivelRiscoAtual,
-                    Ativo = r.Ativo,
-                    CriadoEm = r.CriadoEm,
-                    AtualizadoEm = r.AtualizadoEm
-
-                })
-                .ToListAsync();
-        }
+        public async Task<List<RegiaoResponseDto>> ListarTodas() =>
+            (await _regioes.ListarAsync()).Select(ParaDto).ToList();
 
         // listar regiao por id
         public async Task<RegiaoResponseDto?> ObterPorId(Guid id)
         {
-            return await _context.Regioes
-                .AsNoTracking()
-                .Where(r => r.Id == id)
-                .Select(r => new RegiaoResponseDto
-                {
-                    Id = r.Id,
-                    Nome = r.Nome,
-                    Cidade = r.Cidade,
-                    Estado = r.Estado,
-                    NivelRiscoAtual = r.NivelRiscoAtual,
-                    Ativo = r.Ativo,
-                    CriadoEm = r.CriadoEm,
-                    AtualizadoEm = r.AtualizadoEm
-                })
-                .FirstOrDefaultAsync();
+            var regiao = await _regioes.ObterPorIdAsync(id);
+            return regiao == null ? null : ParaDto(regiao);
         }
 
         // res - regiao após cadastro
@@ -67,33 +50,16 @@ namespace AlertaJa.Api.Services
                 CriadoEm = DateTime.Now
             };
 
-            _context.Regioes.Add(regiao);
+            _regioes.Adicionar(regiao);
+            await _uow.SalvarAsync();
 
-            await _context.SaveChangesAsync();
-
-            return await _context.Regioes
-                .AsNoTracking()
-                .Where(r => r.Id == regiao.Id)
-                .Select(r => new RegiaoResponseDto
-                {
-                    Id = r.Id,
-                    Nome = r.Nome,
-                    Cidade = r.Cidade,
-                    Estado = r.Estado,
-                    NivelRiscoAtual = r.NivelRiscoAtual,
-                    Ativo = r.Ativo,
-                    CriadoEm = r.CriadoEm,
-                    AtualizadoEm = r.AtualizadoEm
-                })
-                .FirstAsync();
+            return ParaDto(regiao);
         }
 
-
         // res - regiao após atualizacao
-        public async Task<RegiaoResponseDto?> Atualizar (Guid id, AtualizarRegiaoDto dto)
+        public async Task<RegiaoResponseDto?> Atualizar(Guid id, AtualizarRegiaoDto dto)
         {
-            var regiao = await _context.Regioes
-                .FirstOrDefaultAsync(r => r.Id == id);
+            var regiao = await _regioes.ObterPorIdAsync(id);
 
             if (regiao == null)
             {
@@ -106,19 +72,9 @@ namespace AlertaJa.Api.Services
             regiao.Ativo = dto.Ativo;
             regiao.AtualizadoEm = DateTime.Now;
 
-            await _context.SaveChangesAsync();
+            await _uow.SalvarAsync();
 
-            return new RegiaoResponseDto
-            {
-                Id = regiao.Id,
-                Nome = regiao.Nome,
-                Cidade = regiao.Cidade,
-                Estado = regiao.Estado,
-                NivelRiscoAtual = regiao.NivelRiscoAtual,
-                Ativo = regiao.Ativo, // [CORREÇÃO QA] campo não era devolvido (sempre false)
-                CriadoEm = regiao.CriadoEm,
-                AtualizadoEm = regiao.AtualizadoEm
-            };
+            return ParaDto(regiao);
         }
     }
 }

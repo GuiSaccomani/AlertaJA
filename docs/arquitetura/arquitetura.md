@@ -28,7 +28,11 @@ Services/                 → regras de negócio
   MedicaoService            valida e registra a medição, atualiza ultima_leitura, aciona o AlertaService
   AlertaService             classifica, abre/atualiza/resolve alertas, recalcula o risco da região
   RegiaoService / SensorService   CRUD e validações (limites em ordem, região ativa, código único)
-Data/AppDbContext.cs      → mapeamento EF Core ↔ tabelas Oracle (DbSet = Repository, SaveChanges = Unit of Work)
+Repositories/             → acesso a dados (os Services dependem só das interfaces)
+  Interfaces.cs             IUsuarioRepository, IRegiaoRepository, ISensorRepository,
+                            IMedicaoRepository, IAlertaRepository, IUnitOfWork
+  Repositorios.cs           implementações com EF Core + UnitOfWork (SaveChanges numa transação)
+Data/AppDbContext.cs      → mapeamento EF Core ↔ tabelas Oracle
 Models/ · DTOs/ · Enums/  → entidades, contratos de entrada/saída e TipoSensor
 ```
 
@@ -45,19 +49,20 @@ sequenceDiagram
     S->>C: POST /api/medicoes {sensorId, valor} + X-API-Key
     C->>C: FixedTimeEquals(API Key) - 401 se inválida
     C->>M: Receber(dto)
-    M->>DB: busca sensor (existe e ativo? senão 400)
+    M->>DB: ISensorRepository busca o sensor (existe e ativo? senão 400)
     M->>A: ProcessarMedicao(sensor, medicao)
     A->>A: classifica NORMAL / ATENCAO / ALERTA / PERIGO
     A->>A: abre, atualiza ou resolve (RESOLVIDO_AUTO) o alerta do sensor
     A->>A: risco da região = pior nível entre alertas ativos
-    M->>DB: SaveChangesAsync() - medição + alerta + região em uma transação
+    M->>DB: IUnitOfWork.SalvarAsync() - medição + alerta + região em uma transação
     C-->>S: 201 Created
     APP->>C: GET /api/regioes e /api/alertas (a cada 10 s)
 ```
 
 ## Decisões de projeto
 
-* **Sem camada Repository genérica:** o EF Core já oferece `DbSet<T>` (repositório) e `SaveChangesAsync()` (unidade de trabalho); um repositório que só repassasse chamadas duplicaria a abstração.
+* **Camada Repository explícita:** cada entidade tem uma interface (`IRegiaoRepository`, `ISensorRepository`...) e uma implementação com EF Core. Os Services não conhecem o `AppDbContext`, o que separa regra de negócio de acesso a dados e permite trocar o banco ou testar os Services com repositórios falsos.
+* **Unit of Work:** todos os repositórios compartilham o mesmo contexto da requisição; o `IUnitOfWork.SalvarAsync()` grava tudo de uma vez (medição + alerta + risco da região).
 * **GUIDs como chave primária**, gerados pela aplicação: permitem criar medição e alerta relacionados antes de gravar, numa única transação.
 * **Proxy do Vite** no frontend: evita configurar CORS na API e aceita o certificado HTTPS de desenvolvimento.
 * **API Key separada do JWT:** dispositivos IoT não têm usuário; a chave autentica o envio de leituras sem expor credenciais de pessoas.

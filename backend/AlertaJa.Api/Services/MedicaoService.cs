@@ -1,23 +1,38 @@
-﻿
-using AlertaJa.Api.Data;
-using AlertaJa.Api.DTOs.Medicoes;
+﻿using AlertaJa.Api.DTOs.Medicoes;
 using AlertaJa.Api.Models;
-using Microsoft.EntityFrameworkCore;
+using AlertaJa.Api.Repositories;
 
 namespace AlertaJa.Api.Services
 {
     public class MedicaoService
     {
-        private readonly AppDbContext _context;
-private readonly AlertaService _alertaService;
+        private readonly IMedicaoRepository _medicoes;
+        private readonly ISensorRepository _sensores;
+        private readonly IUnitOfWork _uow;
+        private readonly AlertaService _alertaService;
 
-public MedicaoService(
-    AppDbContext context,
-    AlertaService alertaService)
-{
-    _context = context;
-    _alertaService = alertaService;
-}
+        public MedicaoService(
+            IMedicaoRepository medicoes,
+            ISensorRepository sensores,
+            IUnitOfWork uow,
+            AlertaService alertaService)
+        {
+            _medicoes = medicoes;
+            _sensores = sensores;
+            _uow = uow;
+            _alertaService = alertaService;
+        }
+
+        private static MedicaoResponseDto ParaDto(Medicao m) => new()
+        {
+            Id = m.Id,
+            SensorId = m.SensorId,
+            CodigoIdentificador = m.Sensor?.CodigoIdentificador ?? string.Empty,
+            UnidadeMedida = m.Sensor?.UnidadeMedida ?? string.Empty,
+            Valor = m.Valor,
+            DataHora = m.DataHora
+        };
+
         //registra novas medicoes
         public async Task Receber(ReceberMedicaoDto dto)
         {
@@ -33,8 +48,7 @@ public MedicaoService(
                     "O valor da medição não pode ser negativo.");
             }
 
-            var sensor = await _context.Sensores
-                .FirstOrDefaultAsync(s => s.Id == dto.SensorId);
+            var sensor = await _sensores.ObterPorIdAsync(dto.SensorId);
 
             if (sensor == null || !sensor.Ativo)
             {
@@ -43,7 +57,7 @@ public MedicaoService(
             }
 
             var agora = DateTime.Now;
- 
+
             var medicao = new Medicao
             {
                 Id = Guid.NewGuid(),
@@ -55,53 +69,23 @@ public MedicaoService(
 
             sensor.UltimaLeitura = medicao.DataHora;
 
-            _context.Medicoes.Add(medicao);
+            _medicoes.Adicionar(medicao);
 
-            await _alertaService.ProcessarMedicao(
-                sensor,
-                medicao,
-                agora
-            );
+            await _alertaService.ProcessarMedicao(sensor, medicao, agora);
 
-            await _context.SaveChangesAsync();
+            // medição, alerta e risco da região gravados na mesma transação
+            await _uow.SalvarAsync();
         }
 
         //lista todas
-        public async Task<List<MedicaoResponseDto>> ListarTodas()
-        {
-            return await _context.Medicoes
-                .AsNoTracking()
-                .OrderByDescending(m => m.DataHora)
-                .Select(m => new MedicaoResponseDto
-                {
-                    Id = m.Id,
-                    SensorId = m.SensorId,
-                    CodigoIdentificador = m.Sensor!.CodigoIdentificador,
-                    UnidadeMedida = m.Sensor!.UnidadeMedida,
-                    Valor = m.Valor,
-                    DataHora = m.DataHora
-                })
-                .ToListAsync();
-        }
+        public async Task<List<MedicaoResponseDto>> ListarTodas() =>
+            (await _medicoes.ListarAsync()).Select(ParaDto).ToList();
 
         //lista por id
         public async Task<MedicaoResponseDto?> ObterPorId(Guid id)
         {
-            return await _context.Medicoes
-                .AsNoTracking()
-                .Where(m => m.Id == id)
-                .Select(m => new MedicaoResponseDto
-                {
-                    Id = m.Id,
-                    SensorId = m.SensorId,
-                    CodigoIdentificador = m.Sensor!.CodigoIdentificador,
-                    UnidadeMedida = m.Sensor!.UnidadeMedida,
-                    Valor = m.Valor,
-                    DataHora = m.DataHora
-                })
-                .FirstOrDefaultAsync();
+            var medicao = await _medicoes.ObterPorIdAsync(id);
+            return medicao == null ? null : ParaDto(medicao);
         }
-
-
     }
 }

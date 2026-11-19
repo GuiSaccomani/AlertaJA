@@ -1,23 +1,23 @@
-﻿
-using AlertaJa.Api.Data;
+﻿using AlertaJa.Api.DTOs.Alertas;
 using AlertaJa.Api.Models;
-using AlertaJa.Api.DTOs.Alertas;
-using Microsoft.EntityFrameworkCore;
+using AlertaJa.Api.Repositories;
 
 namespace AlertaJa.Api.Services
 {
     public class AlertaService
     {
-        private readonly AppDbContext _context;
+        private readonly IAlertaRepository _alertas;
+        private readonly IRegiaoRepository _regioes;
+        private readonly IUnitOfWork _uow;
 
-        public AlertaService(AppDbContext context)
+        public AlertaService(IAlertaRepository alertas, IRegiaoRepository regioes, IUnitOfWork uow)
         {
-            _context = context;
+            _alertas = alertas;
+            _regioes = regioes;
+            _uow = uow;
         }
 
-        private static string ClassificarNivel(
-            decimal valor,
-            Sensor sensor)
+        private static string ClassificarNivel(decimal valor, Sensor sensor)
         {
             if (valor >= sensor.LimitePerigo)
                 return "PERIGO";
@@ -31,16 +31,14 @@ namespace AlertaJa.Api.Services
             return "NORMAL";
         }
 
-        public async Task ProcessarMedicao(
-            Sensor sensor,
-            Medicao medicao,
-            DateTime agora)
+        // Classifica a medição, abre/atualiza/resolve o alerta do sensor e
+        // recalcula o risco da região. A gravação fica a cargo de quem chama
+        // (MedicaoService), para que tudo vá numa única transação.
+        public async Task ProcessarMedicao(Sensor sensor, Medicao medicao, DateTime agora)
         {
             var nivel = ClassificarNivel(medicao.Valor, sensor);
 
-            var regiao = await _context.Regioes
-                .Include(r => r.Alertas)
-                .FirstOrDefaultAsync(r => r.Id == sensor.RegiaoId);
+            var regiao = await _regioes.ObterComAlertasAsync(sensor.RegiaoId);
 
             if (regiao == null)
                 throw new InvalidOperationException(
@@ -115,103 +113,59 @@ namespace AlertaJa.Api.Services
             return "NORMAL";
         }
 
-        //listar todos
-        public async Task<List<AlertaResponseDto>> ListarTodos()
+        private static AlertaResponseDto ParaDto(Alerta a) => new()
         {
-            return await _context.Alertas
-                .AsNoTracking()
-                .OrderByDescending(a => a.DataEmissao)
-                .Select(a => new AlertaResponseDto
+            Id = a.Id,
+            RegiaoId = a.RegiaoId,
+            NomeRegiao = a.Regiao?.Nome ?? string.Empty,
+            SensorId = a.SensorId,
+            CodigoIdentificador = a.Sensor?.CodigoIdentificador ?? string.Empty,
+            Nivel = a.Nivel,
+            Status = a.Status,
+            Titulo = a.Titulo,
+            Descricao = a.Descricao,
+            Ativo = a.Ativo,
+            DataEmissao = a.DataEmissao,
+            DataUltimaOcorrencia = a.DataUltimaOcorrencia,
+            DataResolucao = a.DataResolucao
+        };
 
-                {
-                    Id = a.Id,
-
-                    RegiaoId = a.RegiaoId,
-                    NomeRegiao = a.Regiao!.Nome,
-
-                    SensorId = a.SensorId,
-                    CodigoIdentificador = a.Sensor!.CodigoIdentificador,
-
-                    Nivel = a.Nivel,
-                    Status = a.Status,
-
-                    Titulo = a.Titulo,
-                    Descricao = a.Descricao,
-
-                    Ativo = a.Ativo,
-
-                    DataEmissao = a.DataEmissao,
-                    DataUltimaOcorrencia = a.DataUltimaOcorrencia,
-                    DataResolucao = a.DataResolucao
-                })
-                .ToListAsync();
-        }
+        //listar todos
+        public async Task<List<AlertaResponseDto>> ListarTodos() =>
+            (await _alertas.ListarAsync()).Select(ParaDto).ToList();
 
         //lista por id
-
         public async Task<AlertaResponseDto?> ObterPorId(Guid id)
         {
-            return await _context.Alertas
-                .AsNoTracking()
-                .Where(a => a.Id == id)
-                .Select(a => new AlertaResponseDto
-                {
-                    Id = a.Id,
-
-                    RegiaoId = a.RegiaoId,
-                    NomeRegiao = a.Regiao!.Nome,
-
-                    SensorId = a.SensorId,
-                    CodigoIdentificador = a.Sensor!.CodigoIdentificador,
-
-                    Nivel = a.Nivel,
-                    Status = a.Status,
-
-                    Titulo = a.Titulo,
-                    Descricao = a.Descricao,
-
-                    Ativo = a.Ativo,
-
-                    DataEmissao = a.DataEmissao,
-                    DataUltimaOcorrencia = a.DataUltimaOcorrencia,
-                    DataResolucao = a.DataResolucao
-                })
-                .FirstOrDefaultAsync();
+            var alerta = await _alertas.ObterPorIdAsync(id);
+            return alerta == null ? null : ParaDto(alerta);
         }
-
 
         public async Task<bool> Excluir(Guid id)
         {
-            var alerta = await _context.Alertas
-                .FirstOrDefaultAsync(a => a.Id == id);
+            var alerta = await _alertas.ObterPorIdAsync(id);
 
             if (alerta == null)
                 return false;
 
             if (alerta.Ativo)
             {
-                var regiao = await _context.Regioes
-                    .Include(r => r.Alertas)
-                    .FirstOrDefaultAsync(r => r.Id == alerta.RegiaoId);
+                var regiao = await _regioes.ObterComAlertasAsync(alerta.RegiaoId);
 
                 if (regiao != null)
                 {
-                    var alertasRestantes = regiao.Alertas
-                        .Where(a => a.Id != alerta.Id);
+                    var alertasRestantes = regiao.Alertas.Where(a => a.Id != alerta.Id);
 
-                    regiao.NivelRiscoAtual =
-                        CalcularRiscoRegiao(alertasRestantes);
-
+                    regiao.NivelRiscoAtual = CalcularRiscoRegiao(alertasRestantes);
                     regiao.AtualizadoEm = DateTime.Now;
                 }
             }
 
-            _context.Alertas.Remove(alerta);
+            _alertas.Remover(alerta);
 
-            await _context.SaveChangesAsync();
+            await _uow.SalvarAsync();
 
             return true;
         }
-
     }
 }

@@ -6,6 +6,7 @@ A suíte Postman/Newman (`tests/AlertaJa.postman_collection.json`, 49 casos, 83 
 | --- | --- | --- | --- |
 | 1 | versão do commit `ae52d3e` (GitHub) | 45 / 49 | 79 / 83 |
 | 2 | após as correções abaixo | **49 / 49** | **83 / 83** |
+| 3 | após criar a camada Repository (item 14) | **49 / 49** | **83 / 83** |
 
 Todas as alterações no código estão marcadas com o comentário `// [CORREÇÃO QA]`.
 
@@ -50,3 +51,11 @@ Todas as alterações no código estão marcadas com o comentário `// [CORREÇ�
 - Quando a leitura cai de PERIGO para ALERTA, o mesmo alerta é rebaixado; o pico não fica registrado no alerta (fica na tabela de medições).
 - `GET /api/medicoes` e `GET /api/alertas` não têm paginação.
 - Não existe endpoint para resolver um alerta manualmente (status `RESOLVIDO_MANUAL` existe no banco).
+
+## Arquitetura — camada Repository explícita
+
+| # | Situação anterior | Mudança | Arquivos |
+| --- | --- | --- | --- |
+| 14 | Os Services acessavam o `AppDbContext` diretamente (o EF Core fazia o papel de repositório) | Camada `Repositories/` com uma interface e uma implementação por entidade (`IUsuarioRepository`, `IRegiaoRepository`, `ISensorRepository`, `IMedicaoRepository`, `IAlertaRepository`) e um `IUnitOfWork`. Os Services passaram a depender só das interfaces; os Controllers não mudaram | `Repositories/Interfaces.cs`, `Repositories/Repositorios.cs`, `Services/*.cs`, `Program.cs` |
+
+**Verificação:** a suíte completa foi executada de novo após a refatoração (execução 3, `tests/relatorios/run3`): **49/49 casos, 83/83 asserções**, e o simulador continuou levando a região de NORMAL a PERIGO e de volta a NORMAL.
