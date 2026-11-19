@@ -14,7 +14,7 @@
 [![Postman](https://img.shields.io/badge/Postman%20%2F%20Newman-49%20casos-orange.svg)](tests/)
 [![Status](https://img.shields.io/badge/Testes-49%2F49%20Aprovados-success.svg)](docs/testes-e-cenarios/cenarios_de_teste.md)
 
-🎥 **Vídeo pitch:** `INSERIR_LINK_DO_VIDEO_AQUI` · 👥 **Integrantes e RMs:** [`entrega_info.txt`](entrega_info.txt)
+🎥 **Vídeo pitch:** [https://youtu.be/PFUH-JTZJIQ](https://youtu.be/PFUH-JTZJIQ) · 👥 **Integrantes e RMs:** [`entrega_info.txt`](entrega_info.txt)
 
 ---
 

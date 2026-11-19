@@ -24,7 +24,7 @@ Ano/Semestre: 2026 / 2º Semestre
 
 4. LINK DO VÍDEO PITCH
 --------------------------------------------------------------------------------
-INSERIR_LINK_DO_VIDEO_AQUI
+https://youtu.be/PFUH-JTZJIQ
 
 (Aviso: o vídeo deve estar como 'Público' ou 'Não listado'. Teste o link numa aba anônima.)
 
