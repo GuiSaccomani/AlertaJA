@@ -1,0 +1,2281 @@
+{
+  "info": {
+    "_postman_id": "a51b54d8-5065-5737-ac5f-6f303ce22c72",
+    "name": "AlertaJá API - Global Solution 2026/2",
+    "description": "Coleção completa da API AlertaJá (ASP.NET Core 10 + Oracle).\n\nExecute em ordem (Run collection) — as requisições encadeiam variáveis (tokens, ids criados). Variáveis: baseUrl, apiKey, adminSenha, cidadaoSenha.\n\nCertificado local: em Settings desative 'SSL certificate verification' ou confie no certificado com `dotnet dev-certs https --trust`.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "00 - Status",
+      "description": "Verificação de disponibilidade da API.",
+      "item": [
+        {
+          "name": "CT01 - Status da API",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Sistema online\", () => pm.expect(pm.response.json().status).to.eql(\"Online\"));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "status"
+              ]
+            },
+            "description": "Health-check público.",
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "01 - Autenticação",
+      "description": "Login com e-mail/senha (hash PBKDF2 via PasswordHasher) e emissão de JWT.",
+      "item": [
+        {
+          "name": "CT02 - Login administrador (válido)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "const j = pm.response.json();",
+                  "pm.test(\"Retorna token JWT\", () => pm.expect(j.token.split(\".\").length).to.eql(3));",
+                  "pm.test(\"Perfil ROLE_ADMIN\", () => pm.expect(j.role).to.eql(\"ROLE_ADMIN\"));",
+                  "pm.test(\"Resposta não expõe a senha\", () => pm.expect(j).to.not.have.property(\"senha\"));",
+                  "pm.collectionVariables.set(\"adminToken\", j.token);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Credenciais válidas do perfil ROLE_ADMIN. Salva o token em {{adminToken}}.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@alertaja.com\",\n  \"senha\": \"{{adminSenha}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        },
+        {
+          "name": "CT03 - Login cidadão (válido)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "const j = pm.response.json();",
+                  "pm.test(\"Perfil ROLE_CIDADAO\", () => pm.expect(j.role).to.eql(\"ROLE_CIDADAO\"));",
+                  "pm.collectionVariables.set(\"cidadaoToken\", j.token);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Credenciais válidas do perfil ROLE_CIDADAO. Salva o token em {{cidadaoToken}}.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"maria@email.com\",\n  \"senha\": \"{{cidadaoSenha}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        },
+        {
+          "name": "CT04 - Login com senha incorreta",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 401\", () => pm.response.to.have.status(401));",
+                  "pm.test(\"Mensagem genérica\", () => pm.expect(pm.response.json().mensagem).to.eql(\"E-mail ou senha inválidos.\"));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Senha errada deve ser rejeitada com mensagem genérica (não revela se o e-mail existe).",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@alertaja.com\",\n  \"senha\": \"senhaErrada\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        },
+        {
+          "name": "CT05 - Login com e-mail inexistente",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 401\", () => pm.response.to.have.status(401));",
+                  "pm.test(\"Mensagem genérica\", () => pm.expect(pm.response.json().mensagem).to.eql(\"E-mail ou senha inválidos.\"));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            },
+            "description": "E-mail não cadastrado retorna a mesma mensagem genérica.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"naoexiste@alertaja.com\",\n  \"senha\": \"qualquer\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        },
+        {
+          "name": "CT06 - Tentativa de SQL Injection no login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"SQLi não autentica (401)\", () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Payload clássico de SQLi. O EF Core parametriza a consulta, então a string é tratada como dado.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"' OR '1'='1' --\",\n  \"senha\": \"' OR '1'='1\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        },
+        {
+          "name": "CT07 - Login com corpo inválido (email nulo)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 400\", () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Validação automática do [ApiController] para campos obrigatórios.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": null,\n  \"senha\": null\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "02 - Regiões",
+      "description": "CRUD de regiões monitoradas. GET público; POST/PUT exigem ROLE_ADMIN.",
+      "item": [
+        {
+          "name": "CT08 - Listar regiões",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Retorna array com regiões\", () => pm.expect(pm.response.json()).to.be.an(\"array\").that.is.not.empty);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/regioes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "regioes"
+              ]
+            },
+            "description": "Lista pública de regiões.",
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        },
+        {
+          "name": "CT09 - Obter região por id",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Id confere\", () => pm.expect(pm.response.json().id).to.eql(\"bea18d4e-5c6d-40f0-8ff0-e6da0e8cf625\"));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/regioes/bea18d4e-5c6d-40f0-8ff0-e6da0e8cf625",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "regioes",
+                "bea18d4e-5c6d-40f0-8ff0-e6da0e8cf625"
+              ]
+            },
+            "description": "Região da carga inicial (Centro - Nova Serrana).",
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        },
+        {
+          "name": "CT10 - Obter região inexistente",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 404\", () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/regioes/00000000-0000-0000-0000-000000000001",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "regioes",
+                "00000000-0000-0000-0000-000000000001"
+              ]
+            },
+            "description": "GUID válido sem registro.",
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        },
+        {
+          "name": "CT11 - Criar região sem token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 401\", () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/regioes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "regioes"
+              ]
+            },
+            "description": "Operação administrativa sem autenticação.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"QA Automatizado\",\n  \"cidade\": \"Divinópolis\",\n  \"estado\": \"mg\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        },
+        {
+          "name": "CT12 - Criar região como cidadão",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 403\", () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/regioes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "regioes"
+              ]
+            },
+            "description": "Usuário autenticado sem o papel exigido.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"QA Automatizado\",\n  \"cidade\": \"Divinópolis\",\n  \"estado\": \"mg\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{cidadaoToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "CT13 - Criar região com dados inválidos",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 400\", () => pm.response.to.have.status(400));",
+                  "const e = pm.response.json().errors || {};",
+                  "pm.test(\"Aponta erro em Nome e Estado\", () => { pm.expect(Object.keys(e).join()).to.match(/Nome/i); pm.expect(Object.keys(e).join()).to.match(/Estado/i); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/regioes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "regioes"
+              ]
+            },
+            "description": "Nome vazio e UF com 3 caracteres devem ser rejeitados pelas DataAnnotations.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"\",\n  \"cidade\": \"Divinópolis\",\n  \"estado\": \"MGX\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "CT14 - Criar região (admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 201\", () => pm.response.to.have.status(201));",
+                  "const j = pm.response.json();",
+                  "pm.test(\"Header Location presente\", () => pm.expect(pm.response.headers.get(\"Location\")).to.include(j.id));",
+                  "pm.test(\"UF normalizada para maiúsculas\", () => pm.expect(j.estado).to.eql(\"MG\"));",
+                  "pm.test(\"Nível inicial NORMAL\", () => pm.expect(j.nivelRiscoAtual).to.eql(\"NORMAL\"));",
+                  "pm.test(\"Data de criação preenchida\", () => pm.expect(j.criadoEm).to.not.match(/^0001-01-01/));",
+                  "pm.collectionVariables.set(\"novaRegiaoId\", j.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/regioes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "regioes"
+              ]
+            },
+            "description": "Cadastro válido. Salva {{novaRegiaoId}}.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"QA Automatizado\",\n  \"cidade\": \"Divinópolis\",\n  \"estado\": \"mg\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "CT15 - Atualizar região (admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "const j = pm.response.json();",
+                  "pm.test(\"Cidade atualizada\", () => pm.expect(j.cidade).to.eql(\"Nova Serrana\"));",
+                  "pm.test(\"Campo ativo refletido na resposta\", () => pm.expect(j.ativo).to.eql(true));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/regioes/{{novaRegiaoId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "regioes",
+                "{{novaRegiaoId}}"
+              ]
+            },
+            "description": "Atualização completa da região criada.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"QA Automatizado\",\n  \"cidade\": \"Nova Serrana\",\n  \"estado\": \"MG\",\n  \"ativo\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "CT16 - Atualizar região inexistente",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 404\", () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/regioes/00000000-0000-0000-0000-000000000001",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "regioes",
+                "00000000-0000-0000-0000-000000000001"
+              ]
+            },
+            "description": "GUID sem registro.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"X\",\n  \"cidade\": \"Y\",\n  \"estado\": \"MG\",\n  \"ativo\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "03 - Sensores",
+      "description": "CRUD de sensores com limites atenção < alerta < perigo.",
+      "item": [
+        {
+          "name": "CT17 - Listar sensores",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Tipos serializados como texto\", () => pm.expect([\"PLUVIOMETRO\",\"NIVEL_AGUA\"]).to.include(pm.response.json()[0].tipo));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/sensores",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "sensores"
+              ]
+            },
+            "description": "Lista pública de sensores.",
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        },
+        {
+          "name": "CT18 - Obter sensor por id",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Código PLUV-001\", () => pm.expect(pm.response.json().codigoIdentificador).to.eql(\"PLUV-001\"));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/sensores/e39ad137-24d6-4153-bc03-92ab5ad529de",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "sensores",
+                "e39ad137-24d6-4153-bc03-92ab5ad529de"
+              ]
+            },
+            "description": "Sensor PLUV-001 da carga inicial.",
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        },
+        {
+          "name": "CT19 - Obter sensor inexistente",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 404\", () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/sensores/00000000-0000-0000-0000-000000000001",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "sensores",
+                "00000000-0000-0000-0000-000000000001"
+              ]
+            },
+            "description": "GUID sem registro.",
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        },
+        {
+          "name": "CT20 - Criar sensor como cidadão",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set(\"sensorCodigo\", \"QA-\" + Date.now());"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 403\", () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/sensores",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "sensores"
+              ]
+            },
+            "description": "Cidadão não pode cadastrar sensores.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"regiaoId\": \"{{novaRegiaoId}}\",\n  \"codigoIdentificador\": \"{{sensorCodigo}}\",\n  \"tipo\": \"PLUVIOMETRO\",\n  \"unidadeMedida\": \"mm\",\n  \"limiteAtencao\": 10,\n  \"limiteAlerta\": 25,\n  \"limitePerigo\": 50\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{cidadaoToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "CT21 - Criar sensor com limites fora de ordem",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"Mensagem explica a ordem dos limites\", () => pm.expect(pm.response.text()).to.include(\"atenção < alerta < perigo\"));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/sensores",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "sensores"
+              ]
+            },
+            "description": "Regra de negócio: atenção < alerta < perigo. Esperado 400 com mensagem de validação.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"regiaoId\": \"{{novaRegiaoId}}\",\n  \"codigoIdentificador\": \"{{sensorCodigo}}\",\n  \"tipo\": \"PLUVIOMETRO\",\n  \"unidadeMedida\": \"mm\",\n  \"limiteAtencao\": 60,\n  \"limiteAlerta\": 40,\n  \"limitePerigo\": 50\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "CT22 - Criar sensor (admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 201\", () => pm.response.to.have.status(201));",
+                  "const j = pm.response.json();",
+                  "pm.test(\"Sensor ativo por padrão\", () => pm.expect(j.ativo).to.eql(true));",
+                  "pm.collectionVariables.set(\"novoSensorId\", j.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/sensores",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "sensores"
+              ]
+            },
+            "description": "Cadastro válido na região criada. Salva {{novoSensorId}}.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"regiaoId\": \"{{novaRegiaoId}}\",\n  \"codigoIdentificador\": \"{{sensorCodigo}}\",\n  \"tipo\": \"PLUVIOMETRO\",\n  \"unidadeMedida\": \"mm\",\n  \"limiteAtencao\": 10,\n  \"limiteAlerta\": 25,\n  \"limitePerigo\": 50\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "CT23 - Criar sensor com código duplicado",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 409\", () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/sensores",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "sensores"
+              ]
+            },
+            "description": "CODIGO_IDENTIFICADOR é UNIQUE. Esperado 409 Conflict (e não erro 500).",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"regiaoId\": \"{{novaRegiaoId}}\",\n  \"codigoIdentificador\": \"{{sensorCodigo}}\",\n  \"tipo\": \"PLUVIOMETRO\",\n  \"unidadeMedida\": \"mm\",\n  \"limiteAtencao\": 10,\n  \"limiteAlerta\": 25,\n  \"limitePerigo\": 50\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "CT24 - Atualizar sensor sem token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 401\", () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/sensores/{{novoSensorId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "sensores",
+                "{{novoSensorId}}"
+              ]
+            },
+            "description": "Sem autenticação.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"regiaoId\": \"{{novaRegiaoId}}\",\n  \"codigoIdentificador\": \"{{sensorCodigo}}\",\n  \"tipo\": \"PLUVIOMETRO\",\n  \"unidadeMedida\": \"mm\",\n  \"limiteAtencao\": 10,\n  \"limiteAlerta\": 25,\n  \"limitePerigo\": 50\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        },
+        {
+          "name": "CT25 - Atualizar sensor (admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Limite de perigo atualizado\", () => pm.expect(pm.response.json().limitePerigo).to.eql(55));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/sensores/{{novoSensorId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "sensores",
+                "{{novoSensorId}}"
+              ]
+            },
+            "description": "Ajusta limites do sensor criado.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"regiaoId\": \"{{novaRegiaoId}}\",\n  \"codigoIdentificador\": \"{{sensorCodigo}}\",\n  \"tipo\": \"PLUVIOMETRO\",\n  \"unidadeMedida\": \"mm\",\n  \"limiteAtencao\": 10,\n  \"limiteAlerta\": 25,\n  \"limitePerigo\": 55,\n  \"ativo\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "04 - Medições e geração de alertas",
+      "description": "Ingestão IoT protegida por X-API-Key e processamento automático de alertas.",
+      "item": [
+        {
+          "name": "CT26 - Enviar medição sem API Key",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 401\", () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/medicoes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "medicoes"
+              ]
+            },
+            "description": "Header X-API-Key ausente.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sensorId\": \"{{novoSensorId}}\",\n  \"valor\": 5\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        },
+        {
+          "name": "CT27 - Enviar medição com API Key inválida",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 401\", () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-API-Key",
+                "value": "chave-invalida"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/medicoes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "medicoes"
+              ]
+            },
+            "description": "Chave incorreta (comparação em tempo constante).",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sensorId\": \"{{novoSensorId}}\",\n  \"valor\": 5\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        },
+        {
+          "name": "CT28 - Enviar medição com valor negativo",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"Mensagem de validação\", () => pm.expect(pm.response.json().mensagem).to.include(\"negativo\"));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/medicoes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "medicoes"
+              ]
+            },
+            "description": "Validação de domínio do valor.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sensorId\": \"{{novoSensorId}}\",\n  \"valor\": -3\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        },
+        {
+          "name": "CT29 - Enviar medição para sensor inexistente",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"Mensagem de sensor inexistente\", () => pm.expect(pm.response.json().mensagem).to.include(\"não existe\"));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/medicoes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "medicoes"
+              ]
+            },
+            "description": "Sensor não cadastrado.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sensorId\": \"00000000-0000-0000-0000-000000000001\",\n  \"valor\": 5\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        },
+        {
+          "name": "CT30 - Medição NORMAL (5 mm)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 201\", () => pm.response.to.have.status(201));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/medicoes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "medicoes"
+              ]
+            },
+            "description": "Valor abaixo do limite de atenção.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sensorId\": \"{{novoSensorId}}\",\n  \"valor\": 5\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        },
+        {
+          "name": "CT31 - Região permanece NORMAL",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"nivelRiscoAtual = NORMAL\", () => pm.expect(pm.response.json().nivelRiscoAtual).to.eql(\"NORMAL\"));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/regioes/{{novaRegiaoId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "regioes",
+                "{{novaRegiaoId}}"
+              ]
+            },
+            "description": "Nenhum alerta deve ser aberto.",
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        },
+        {
+          "name": "CT32 - Medição de PERIGO (72,5 mm)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 201\", () => pm.response.to.have.status(201));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/medicoes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "medicoes"
+              ]
+            },
+            "description": "Valor acima do limite de perigo (55).",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sensorId\": \"{{novoSensorId}}\",\n  \"valor\": 72.5\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        },
+        {
+          "name": "CT33 - Região elevada para PERIGO",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"nivelRiscoAtual = PERIGO\", () => pm.expect(pm.response.json().nivelRiscoAtual).to.eql(\"PERIGO\"));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/regioes/{{novaRegiaoId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "regioes",
+                "{{novaRegiaoId}}"
+              ]
+            },
+            "description": "Risco da região recalculado pelos alertas ativos.",
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        },
+        {
+          "name": "CT34 - Alerta PERIGO criado automaticamente",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "const a = pm.response.json().find(x => x.sensorId === pm.collectionVariables.get(\"novoSensorId\") && x.ativo);",
+                  "pm.test(\"Existe alerta ativo para o sensor\", () => pm.expect(a).to.be.an(\"object\"));",
+                  "pm.test(\"Nível PERIGO / status ATIVO\", () => { pm.expect(a.nivel).to.eql(\"PERIGO\"); pm.expect(a.status).to.eql(\"ATIVO\"); });",
+                  "if (a) pm.collectionVariables.set(\"alertaId\", a.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/alertas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "alertas"
+              ]
+            },
+            "description": "Procura alerta ativo do sensor de teste. Salva {{alertaId}}.",
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        },
+        {
+          "name": "CT35 - Listar medições",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "const m = pm.response.json().find(x => x.sensorId === pm.collectionVariables.get(\"novoSensorId\"));",
+                  "pm.test(\"Medição de teste registrada\", () => pm.expect(m.valor).to.eql(72.5));",
+                  "pm.collectionVariables.set(\"medicaoId\", m.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/medicoes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "medicoes"
+              ]
+            },
+            "description": "Lista ordenada da mais recente para a mais antiga. Salva {{medicaoId}}.",
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        },
+        {
+          "name": "CT36 - Obter medição por id",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Unidade mm\", () => pm.expect(pm.response.json().unidadeMedida).to.eql(\"mm\"));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/medicoes/{{medicaoId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "medicoes",
+                "{{medicaoId}}"
+              ]
+            },
+            "description": "Detalhe com unidade de medida.",
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        },
+        {
+          "name": "CT37 - Obter medição inexistente",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 404\", () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/medicoes/00000000-0000-0000-0000-000000000001",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "medicoes",
+                "00000000-0000-0000-0000-000000000001"
+              ]
+            },
+            "description": "GUID sem registro.",
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        },
+        {
+          "name": "CT38 - Medição volta ao normal (4 mm)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 201\", () => pm.response.to.have.status(201));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/medicoes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "medicoes"
+              ]
+            },
+            "description": "Deve resolver o alerta automaticamente.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sensorId\": \"{{novoSensorId}}\",\n  \"valor\": 4\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        },
+        {
+          "name": "CT39 - Alerta resolvido automaticamente",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "const j = pm.response.json();",
+                  "pm.test(\"Status RESOLVIDO_AUTO\", () => pm.expect(j.status).to.eql(\"RESOLVIDO_AUTO\"));",
+                  "pm.test(\"Inativo com data de resolução\", () => { pm.expect(j.ativo).to.eql(false); pm.expect(j.dataResolucao).to.be.a(\"string\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/alertas/{{alertaId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "alertas",
+                "{{alertaId}}"
+              ]
+            },
+            "description": "Status RESOLVIDO_AUTO e data de resolução.",
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        },
+        {
+          "name": "CT40 - Região volta para NORMAL",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"nivelRiscoAtual = NORMAL\", () => pm.expect(pm.response.json().nivelRiscoAtual).to.eql(\"NORMAL\"));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/regioes/{{novaRegiaoId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "regioes",
+                "{{novaRegiaoId}}"
+              ]
+            },
+            "description": "Sem alertas ativos.",
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "05 - Alertas",
+      "description": "Consulta pública e exclusão restrita a ROLE_ADMIN.",
+      "item": [
+        {
+          "name": "CT41 - Listar alertas",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Retorna array\", () => pm.expect(pm.response.json()).to.be.an(\"array\"));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/alertas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "alertas"
+              ]
+            },
+            "description": "Ordenados por data de emissão (desc).",
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        },
+        {
+          "name": "CT42 - Obter alerta inexistente",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 404\", () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/alertas/00000000-0000-0000-0000-000000000001",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "alertas",
+                "00000000-0000-0000-0000-000000000001"
+              ]
+            },
+            "description": "GUID sem registro.",
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        },
+        {
+          "name": "CT43 - Excluir alerta sem token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 401\", () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/alertas/{{alertaId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "alertas",
+                "{{alertaId}}"
+              ]
+            },
+            "description": "Sem autenticação.",
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        },
+        {
+          "name": "CT44 - Excluir alerta como cidadão",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 403\", () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/alertas/{{alertaId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "alertas",
+                "{{alertaId}}"
+              ]
+            },
+            "description": "Perfil sem permissão.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{cidadaoToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "CT45 - Excluir alerta com token adulterado",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const t = pm.collectionVariables.get(\"adminToken\").split(\".\");",
+                  "t[2] = t[2].split(\"\").reverse().join(\"\");",
+                  "pm.collectionVariables.set(\"tokenAdulterado\", t.join(\".\"));"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 401\", () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/alertas/{{alertaId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "alertas",
+                "{{alertaId}}"
+              ]
+            },
+            "description": "Assinatura do JWT alterada: a validação de IssuerSigningKey deve rejeitar.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAdulterado}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "CT46 - Excluir alerta (admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 204\", () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/alertas/{{alertaId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "alertas",
+                "{{alertaId}}"
+              ]
+            },
+            "description": "Exclusão definitiva.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "CT47 - Excluir alerta já excluído",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 404\", () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/alertas/{{alertaId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "alertas",
+                "{{alertaId}}"
+              ]
+            },
+            "description": "Idempotência: recurso não existe mais.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "06 - Limpeza",
+      "description": "Desativa os registros de teste para não poluir o painel.",
+      "item": [
+        {
+          "name": "CT48 - Desativar sensor de teste",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Sensor inativo\", () => pm.expect(pm.response.json().ativo).to.eql(false));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/sensores/{{novoSensorId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "sensores",
+                "{{novoSensorId}}"
+              ]
+            },
+            "description": "ativo=false.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"regiaoId\": \"{{novaRegiaoId}}\",\n  \"codigoIdentificador\": \"{{sensorCodigo}}\",\n  \"tipo\": \"PLUVIOMETRO\",\n  \"unidadeMedida\": \"mm\",\n  \"limiteAtencao\": 10,\n  \"limiteAlerta\": 25,\n  \"limitePerigo\": 55,\n  \"ativo\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "CT49 - Desativar região de teste",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/regioes/{{novaRegiaoId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "regioes",
+                "{{novaRegiaoId}}"
+              ]
+            },
+            "description": "ativo=false.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"QA Automatizado\",\n  \"cidade\": \"Nova Serrana\",\n  \"estado\": \"MG\",\n  \"ativo\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://localhost:7275"
+    },
+    {
+      "key": "apiKey",
+      "value": "COLE_AQUI_O_VALOR_DE_ALERTAJA_API_KEY"
+    },
+    {
+      "key": "adminSenha",
+      "value": "admin123"
+    },
+    {
+      "key": "cidadaoSenha",
+      "value": "maria123"
+    },
+    {
+      "key": "adminToken",
+      "value": ""
+    },
+    {
+      "key": "cidadaoToken",
+      "value": ""
+    },
+    {
+      "key": "tokenAdulterado",
+      "value": ""
+    },
+    {
+      "key": "sensorCodigo",
+      "value": ""
+    },
+    {
+      "key": "novaRegiaoId",
+      "value": ""
+    },
+    {
+      "key": "novoSensorId",
+      "value": ""
+    },
+    {
+      "key": "medicaoId",
+      "value": ""
+    },
+    {
+      "key": "alertaId",
+      "value": ""
+    }
+  ]
+}

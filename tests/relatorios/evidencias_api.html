@@ -1,0 +1,774 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>Evidências dos testes de API</title><style>
+body{font-family:Segoe UI,Arial,sans-serif;margin:0;background:#f1f5f9;color:#0f172a}
+header{background:#0f172a;color:#fff;padding:22px 32px} header h1{margin:0;font-size:22px} header p{margin:6px 0 0;color:#94a3b8;font-size:13px}
+.kpis{display:flex;gap:12px;padding:16px 32px} .k{background:#fff;border-radius:10px;padding:12px 16px;flex:1;border:1px solid #e2e8f0}
+.k b{font-size:22px;display:block} .k span{font-size:12px;color:#64748b}
+main{padding:0 32px 32px} h2{font-size:16px;margin:22px 0 8px;color:#334155;border-bottom:2px solid #cbd5e1;padding-bottom:4px}
+.card{background:#fff;border:1px solid #e2e8f0;border-left:5px solid #16a34a;border-radius:8px;padding:12px 14px;margin:10px 0;break-inside:avoid}
+.card.fail{border-left-color:#dc2626} .hd{display:flex;align-items:center;gap:10px} .id{font-weight:700;color:#475569}
+.t{font-weight:600;flex:1} .badge{font-size:11px;font-weight:700;padding:2px 8px;border-radius:99px;color:#fff;background:#16a34a} .badge.fail{background:#dc2626}
+.d{margin:4px 0 6px;color:#64748b;font-size:12.5px} .line{font-size:12.5px;margin:4px 0;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.m{font-weight:700;font-size:11px;padding:2px 6px;border-radius:4px;color:#fff;background:#2563eb} .m.POST{background:#d97706} .m.PUT{background:#7c3aed} .m.DELETE{background:#dc2626} .m.GET{background:#16a34a}
+.au{color:#64748b;font-size:11.5px;margin-left:auto} pre{margin:4px 0;padding:8px 10px;border-radius:6px;font-size:11px;white-space:pre-wrap;word-break:break-all;max-height:220px;overflow:hidden}
+pre.req{background:#fff7ed;border:1px solid #fed7aa} pre.res{background:#0f172a;color:#e2e8f0}
+ul{margin:4px 0;padding-left:0;list-style:none;font-size:12px} li.ok{color:#15803d} li.ko{color:#b91c1c}
+.hist{margin-top:6px;font-size:12px;background:#fef2f2;border:1px solid #fecaca;color:#991b1b;padding:6px 8px;border-radius:6px}
+</style></head><body><header><h1>AlertaJá — Evidências dos testes de API (Postman/Newman)</h1>
+<p>Coleção AlertaJa.postman_collection.json · executada por linha de comando com Newman contra https://localhost:7275 (ASP.NET Core 10 + Oracle 19c FIAP) · 19/11/2026</p></header>
+<div class="kpis"><div class="k"><b>49</b><span>casos de teste (requisições)</span></div>
+<div class="k"><b>83</b><span>asserções automatizadas</span></div>
+<div class="k"><b style="color:#dc2626">45/49</b><span>Execução 1 — código original</span></div>
+<div class="k"><b style="color:#16a34a">49/49</b><span>Execução 2 — após correções</span></div></div>
+<main><h2>00 - Status</h2><div class="card pass"><div class="hd"><span class="id">CT01</span>
+<span class="t">Status da API</span><span class="badge pass">PASS</span></div>
+<p class="d">Health-check público.</p>
+<div class="line"><span class="m GET">GET</span><code>/api/status</code><span class="au">sem token</span></div>
+<div class="line"><b>Esperado:</b> HTTP 200 &nbsp;·&nbsp; <b>Obtido:</b> HTTP 200 OK &nbsp;·&nbsp; 34 ms</div>
+<pre class="res">{
+  &quot;sistema&quot;: &quot;AlertaJá&quot;,
+  &quot;status&quot;: &quot;Online&quot;,
+  &quot;versao&quot;: &quot;1.0&quot;
+}</pre><ul><li class="ok">✔ Status 200</li><li class="ok">✔ Sistema online</li></ul></div><h2>01 - Autenticação</h2><div class="card pass"><div class="hd"><span class="id">CT02</span>
+<span class="t">Login administrador (válido)</span><span class="badge pass">PASS</span></div>
+<p class="d">Credenciais válidas do perfil ROLE_ADMIN. Salva o token em {{adminToken}}.</p>
+<div class="line"><span class="m POST">POST</span><code>/api/auth/login</code><span class="au">sem token</span></div>
+<pre class="req">{
+  &quot;email&quot;: &quot;admin@alertaja.com&quot;,
+  &quot;senha&quot;: &quot;{{adminSenha}}&quot;
+}</pre><div class="line"><b>Esperado:</b> HTTP 200 &nbsp;·&nbsp; <b>Obtido:</b> HTTP 200 OK &nbsp;·&nbsp; 1307 ms</div>
+<pre class="res">{
+  &quot;token&quot;: &quot;eyJhbGciOiJIU…&quot;,
+  &quot;expiraEm&quot;: &quot;2026-11-19T13:28:52.988596Z&quot;,
+  &quot;nome&quot;: &quot;Administrador&quot;,
+  &quot;email&quot;: &quot;admin@alertaja.com&quot;,
+  &quot;role&quot;: &quot;ROLE_ADMIN&quot;
+}</pre><ul><li class="ok">✔ Status 200</li><li class="ok">✔ Retorna token JWT</li><li class="ok">✔ Perfil ROLE_ADMIN</li><li class="ok">✔ Resposta não expõe a senha</li></ul></div><div class="card pass"><div class="hd"><span class="id">CT03</span>
+<span class="t">Login cidadão (válido)</span><span class="badge pass">PASS</span></div>
+<p class="d">Credenciais válidas do perfil ROLE_CIDADAO. Salva o token em {{cidadaoToken}}.</p>
+<div class="line"><span class="m POST">POST</span><code>/api/auth/login</code><span class="au">sem token</span></div>
+<pre class="req">{
+  &quot;email&quot;: &quot;maria@email.com&quot;,
+  &quot;senha&quot;: &quot;{{cidadaoSenha}}&quot;
+}</pre><div class="line"><b>Esperado:</b> HTTP 200 &nbsp;·&nbsp; <b>Obtido:</b> HTTP 200 OK &nbsp;·&nbsp; 103 ms</div>
+<pre class="res">{
+  &quot;token&quot;: &quot;eyJhbGciOiJIU…&quot;,
+  &quot;expiraEm&quot;: &quot;2026-11-19T13:28:53.1863798Z&quot;,
+  &quot;nome&quot;: &quot;Maria Silva&quot;,
+  &quot;email&quot;: &quot;maria@email.com&quot;,
+  &quot;role&quot;: &quot;ROLE_CIDADAO&quot;
+}</pre><ul><li class="ok">✔ Status 200</li><li class="ok">✔ Perfil ROLE_CIDADAO</li></ul></div><div class="card pass"><div class="hd"><span class="id">CT04</span>
+<span class="t">Login com senha incorreta</span><span class="badge pass">PASS</span></div>
+<p class="d">Senha errada deve ser rejeitada com mensagem genérica (não revela se o e-mail existe).</p>
+<div class="line"><span class="m POST">POST</span><code>/api/auth/login</code><span class="au">sem token</span></div>
+<pre class="req">{
+  &quot;email&quot;: &quot;admin@alertaja.com&quot;,
+  &quot;senha&quot;: &quot;senhaErrada&quot;
+}</pre><div class="line"><b>Esperado:</b> HTTP 401 &nbsp;·&nbsp; <b>Obtido:</b> HTTP 401 Unauthorized &nbsp;·&nbsp; 117 ms</div>
+<pre class="res">{
+  &quot;mensagem&quot;: &quot;E-mail ou senha inválidos.&quot;
+}</pre><ul><li class="ok">✔ Status 401</li><li class="ok">✔ Mensagem genérica</li></ul></div><div class="card pass"><div class="hd"><span class="id">CT05</span>
+<span class="t">Login com e-mail inexistente</span><span class="badge pass">PASS</span></div>
+<p class="d">E-mail não cadastrado retorna a mesma mensagem genérica.</p>
+<div class="line"><span class="m POST">POST</span><code>/api/auth/login</code><span class="au">sem token</span></div>
+<pre class="req">{
+  &quot;email&quot;: &quot;naoexiste@alertaja.com&quot;,
+  &quot;senha&quot;: &quot;qualquer&quot;
+}</pre><div class="line"><b>Esperado:</b> HTTP 401 &nbsp;·&nbsp; <b>Obtido:</b> HTTP 401 Unauthorized &nbsp;·&nbsp; 12 ms</div>
+<pre class="res">{
+  &quot;mensagem&quot;: &quot;E-mail ou senha inválidos.&quot;
+}</pre><ul><li class="ok">✔ Status 401</li><li class="ok">✔ Mensagem genérica</li></ul></div><div class="card pass"><div class="hd"><span class="id">CT06</span>
+<span class="t">Tentativa de SQL Injection no login</span><span class="badge pass">PASS</span></div>
+<p class="d">Payload clássico de SQLi. O EF Core parametriza a consulta, então a string é tratada como dado.</p>
+<div class="line"><span class="m POST">POST</span><code>/api/auth/login</code><span class="au">sem token</span></div>
+<pre class="req">{
+  &quot;email&quot;: &quot;&#x27; OR &#x27;1&#x27;=&#x27;1&#x27; --&quot;,
+  &quot;senha&quot;: &quot;&#x27; OR &#x27;1&#x27;=&#x27;1&quot;
+}</pre><div class="line"><b>Esperado:</b> HTTP 401 &nbsp;·&nbsp; <b>Obtido:</b> HTTP 401 Unauthorized &nbsp;·&nbsp; 11 ms</div>
+<pre class="res">{
+  &quot;mensagem&quot;: &quot;E-mail ou senha inválidos.&quot;
+}</pre><ul><li class="ok">✔ SQLi não autentica (401)</li></ul></div><div class="card pass"><div class="hd"><span class="id">CT07</span>
+<span class="t">Login com corpo inválido (email nulo)</span><span class="badge pass">PASS</span></div>
+<p class="d">Validação automática do [ApiController] para campos obrigatórios.</p>
+<div class="line"><span class="m POST">POST</span><code>/api/auth/login</code><span class="au">sem token</span></div>
+<pre class="req">{
+  &quot;email&quot;: null,
+  &quot;senha&quot;: null
+}</pre><div class="line"><b>Esperado:</b> HTTP 400 &nbsp;·&nbsp; <b>Obtido:</b> HTTP 400 Bad Request &nbsp;·&nbsp; 15 ms</div>
+<pre class="res">{
+  &quot;type&quot;: &quot;https://tools.ietf.org/html/rfc9110#section-15.5.1&quot;,
+  &quot;title&quot;: &quot;One or more validation errors occurred.&quot;,
+  &quot;status&quot;: 400,
+  &quot;errors&quot;: {
+    &quot;Email&quot;: [
+      &quot;The Email field is required.&quot;
+    ],
+    &quot;Senha&quot;: [
+      &quot;The Senha field is required.&quot;
+    ]
+  },
+  &quot;traceId&quot;: &quot;00-61670dc17824c8f412312c2e3b695d0d-f7b5ccd83ff8f21a-00&quot;
+}</pre><ul><li class="ok">✔ Status 400</li></ul></div><h2>02 - Regiões</h2><div class="card pass"><div class="hd"><span class="id">CT08</span>
+<span class="t">Listar regiões</span><span class="badge pass">PASS</span></div>
+<p class="d">Lista pública de regiões.</p>
+<div class="line"><span class="m GET">GET</span><code>/api/regioes</code><span class="au">sem token</span></div>
+<div class="line"><b>Esperado:</b> HTTP 200 &nbsp;·&nbsp; <b>Obtido:</b> HTTP 200 OK &nbsp;·&nbsp; 42 ms</div>
+<pre class="res">[
+  {
+    &quot;id&quot;: &quot;ddb9a86a-67ac-4417-944c-ce6820115ff7&quot;,
+    &quot;nome&quot;: &quot;Centro&quot;,
+    &quot;cidade&quot;: &quot;São Paulo&quot;,
+    &quot;estado&quot;: &quot;SP&quot;,
+    &quot;nivelRiscoAtual&quot;: &quot;NORMAL&quot;,
+    &quot;ativo&quot;: true,
+    &quot;criadoEm&quot;: &quot;0001-01-01T00:00:00&quot;,
+    &quot;atualizadoEm&quot;: null
+  },
+  {
+    &quot;id&quot;: &quot;9a74a160-a0b6-4cee-9b51-4d1664ab9b59&quot;,
+    &quot;nome&quot;: &quot;QA Automatizado&quot;,
+    &quot;cidade&quot;: &quot;Nova Serrana&quot;,
+    &quot;estado&quot;: &quot;MG&quot;,
+    &quot;nivelRiscoAtual&quot;: &quot;NORMAL&quot;,
+    &quot;ativo&quot;: false,
+    &quot;criadoEm&quot;: &quot;0001-01-01T00:00:00&quot;,
+    &quot;atualizadoEm&quot;: &quot;2026-11-19T09:24:24.896175&quot;
+  },
+  {
+    &quot;id&quot;: &quot;bea18d4e-5c6d-40f0-8ff0-e6da0e8cf625&quot;,
+    &quot;nome&quot;: &quot;Centro&quot;,
+    &quot;cidade&quot;: &quot;Nova Serrana&quot;,
+    &quot;estado&quot;: &quot;MG&quot;,
+    &quot;nivelRiscoAtual&quot;: &quot;NORMAL&quot;,
+    &quot;ativo&quot;: true,
+    &quot;criadoEm&quot;: &quot;2026-11-10T21:30:09.360844&quot;,
+    &quot;atualizadoEm&quot;: &quot;2026-11-19T09:24:57.336521&quot;
+  },
+  {
+    &quot;id&quot;: &quot;ff50d47f-35a0-433f-85e7-f5e20f8484a2&quot;,
+    &quot;nome&quot;: &quot;Vila Esperanca&quot;,
+    &quot;cidade
+... (truncado)</pre><ul><li class="ok">✔ Status 200</li><li class="ok">✔ Retorna array com regiões</li></ul></div><div class="card pass"><div class="hd"><span class="id">CT09</span>
+<span class="t">Obter região por id</span><span class="badge pass">PASS</span></div>
+<p class="d">Região da carga inicial (Centro - Nova Serrana).</p>
+<div class="line"><span class="m GET">GET</span><code>/api/regioes/bea18d4e-5c6d-40f0-8ff0-e6da0e8cf625</code><span class="au">sem token</span></div>
+<div class="line"><b>Esperado:</b> HTTP 200 &nbsp;·&nbsp; <b>Obtido:</b> HTTP 200 OK &nbsp;·&nbsp; 20 ms</div>
+<pre class="res">{
+  &quot;id&quot;: &quot;bea18d4e-5c6d-40f0-8ff0-e6da0e8cf625&quot;,
+  &quot;nome&quot;: &quot;Centro&quot;,
+  &quot;cidade&quot;: &quot;Nova Serrana&quot;,
+  &quot;estado&quot;: &quot;MG&quot;,
+  &quot;nivelRiscoAtual&quot;: &quot;NORMAL&quot;,
+  &quot;ativo&quot;: true,
+  &quot;criadoEm&quot;: &quot;2026-11-10T21:30:09.360844&quot;,
+  &quot;atualizadoEm&quot;: &quot;2026-11-19T09:24:57.336521&quot;
+}</pre><ul><li class="ok">✔ Status 200</li><li class="ok">✔ Id confere</li></ul></div><div class="card pass"><div class="hd"><span class="id">CT10</span>
+<span class="t">Obter região inexistente</span><span class="badge pass">PASS</span></div>
+<p class="d">GUID válido sem registro.</p>
+<div class="line"><span class="m GET">GET</span><code>/api/regioes/00000000-0000-0000-0000-000000000001</code><span class="au">sem token</span></div>
+<div class="line"><b>Esperado:</b> HTTP 404 &nbsp;·&nbsp; <b>Obtido:</b> HTTP 404 Not Found &nbsp;·&nbsp; 12 ms</div>
+<pre class="res">{
+  &quot;type&quot;: &quot;https://tools.ietf.org/html/rfc9110#section-15.5.5&quot;,
+  &quot;title&quot;: &quot;Not Found&quot;,
+  &quot;status&quot;: 404,
+  &quot;traceId&quot;: &quot;00-9b79538b034bb35ab7ca906049e31599-91b70beaa2d2e6d7-00&quot;
+}</pre><ul><li class="ok">✔ Status 404</li></ul></div><div class="card pass"><div class="hd"><span class="id">CT11</span>
+<span class="t">Criar região sem token</span><span class="badge pass">PASS</span></div>
+<p class="d">Operação administrativa sem autenticação.</p>
+<div class="line"><span class="m POST">POST</span><code>/api/regioes</code><span class="au">sem token</span></div>
+<pre class="req">{
+  &quot;nome&quot;: &quot;QA Automatizado&quot;,
+  &quot;cidade&quot;: &quot;Divinópolis&quot;,
+  &quot;estado&quot;: &quot;mg&quot;
+}</pre><div class="line"><b>Esperado:</b> HTTP 401 &nbsp;·&nbsp; <b>Obtido:</b> HTTP 401 Unauthorized &nbsp;·&nbsp; 7 ms</div>
+<pre class="res"></pre><ul><li class="ok">✔ Status 401</li></ul></div><div class="card pass"><div class="hd"><span class="id">CT12</span>
+<span class="t">Criar região como cidadão</span><span class="badge pass">PASS</span></div>
+<p class="d">Usuário autenticado sem o papel exigido.</p>
+<div class="line"><span class="m POST">POST</span><code>/api/regioes</code><span class="au">Authorization: Bearer &lt;JWT&gt;</span></div>
+<pre class="req">{
+  &quot;nome&quot;: &quot;QA Automatizado&quot;,
+  &quot;cidade&quot;: &quot;Divinópolis&quot;,
+  &quot;estado&quot;: &quot;mg&quot;
+}</pre><div class="line"><b>Esperado:</b> HTTP 403 &nbsp;·&nbsp; <b>Obtido:</b> HTTP 403 Forbidden &nbsp;·&nbsp; 33 ms</div>
+<pre class="res"></pre><ul><li class="ok">✔ Status 403</li></ul></div><div class="card pass"><div class="hd"><span class="id">CT13</span>
+<span class="t">Criar região com dados inválidos</span><span class="badge pass">PASS</span></div>
+<p class="d">Nome vazio e UF com 3 caracteres devem ser rejeitados pelas DataAnnotations.</p>
+<div class="line"><span class="m POST">POST</span><code>/api/regioes</code><span class="au">Authorization: Bearer &lt;JWT&gt;</span></div>
+<pre class="req">{
+  &quot;nome&quot;: &quot;&quot;,
+  &quot;cidade&quot;: &quot;Divinópolis&quot;,
+  &quot;estado&quot;: &quot;MGX&quot;
+}</pre><div class="line"><b>Esperado:</b> HTTP 400 &nbsp;·&nbsp; <b>Obtido:</b> HTTP 400 Bad Request &nbsp;·&nbsp; 10 ms</div>
+<pre class="res">{
+  &quot;type&quot;: &quot;https://tools.ietf.org/html/rfc9110#section-15.5.1&quot;,
+  &quot;title&quot;: &quot;One or more validation errors occurred.&quot;,
+  &quot;status&quot;: 400,
+  &quot;errors&quot;: {
+    &quot;Nome&quot;: [
+      &quot;O nome da regiao é obrigatório.&quot;
+    ],
+    &quot;Estado&quot;: [
+      &quot;O estado deve possuir exatamente 2 caracteres.&quot;
+    ]
+  },
+  &quot;traceId&quot;: &quot;00-cc5dd7493e9456cd91a4c45f1cfe0ac8-de7811fef1bc1909-00&quot;
+}</pre><ul><li class="ok">✔ Status 400</li><li class="ok">✔ Aponta erro em Nome e Estado</li></ul></div><div class="card pass"><div class="hd"><span class="id">CT14</span>
+<span class="t">Criar região (admin)</span><span class="badge pass">PASS</span></div>
+<p class="d">Cadastro válido. Salva {{novaRegiaoId}}.</p>
+<div class="line"><span class="m POST">POST</span><code>/api/regioes</code><span class="au">Authorization: Bearer &lt;JWT&gt;</span></div>
+<pre class="req">{
+  &quot;nome&quot;: &quot;QA Automatizado&quot;,
+  &quot;cidade&quot;: &quot;Divinópolis&quot;,
+  &quot;estado&quot;: &quot;mg&quot;
+}</pre><div class="line"><b>Esperado:</b> HTTP 201 &nbsp;·&nbsp; <b>Obtido:</b> HTTP 201 Created &nbsp;·&nbsp; 189 ms</div>
+<pre class="res">{
+  &quot;id&quot;: &quot;162136af-6e9d-4c1d-82d6-17ce648c59c2&quot;,
+  &quot;nome&quot;: &quot;QA Automatizado&quot;,
+  &quot;cidade&quot;: &quot;Divinópolis&quot;,
+  &quot;estado&quot;: &quot;MG&quot;,
+  &quot;nivelRiscoAtual&quot;: &quot;NORMAL&quot;,
+  &quot;ativo&quot;: true,
+  &quot;criadoEm&quot;: &quot;2026-11-19T09:28:54.242471&quot;,
+  &quot;atualizadoEm&quot;: null
+}</pre><ul><li class="ok">✔ Status 201</li><li class="ok">✔ Header Location presente</li><li class="ok">✔ UF normalizada para maiúsculas</li><li class="ok">✔ Nível inicial NORMAL</li><li class="ok">✔ Data de criação preenchida</li></ul><div class="hist">Execução 1 (código original): <b>FAIL</b> — HTTP 201 · corrigido na execução 2</div></div><div class="card pass"><div class="hd"><span class="id">CT15</span>
+<span class="t">Atualizar região (admin)</span><span class="badge pass">PASS</span></div>
+<p class="d">Atualização completa da região criada.</p>
+<div class="line"><span class="m PUT">PUT</span><code>/api/regioes/162136af-6e9d-4c1d-82d6-17ce648c59c2</code><span class="au">Authorization: Bearer &lt;JWT&gt;</span></div>
+<pre class="req">{
+  &quot;nome&quot;: &quot;QA Automatizado&quot;,
+  &quot;cidade&quot;: &quot;Nova Serrana&quot;,
+  &quot;estado&quot;: &quot;MG&quot;,
+  &quot;ativo&quot;: true
+}</pre><div class="line"><b>Esperado:</b> HTTP 200 &nbsp;·&nbsp; <b>Obtido:</b> HTTP 200 OK &nbsp;·&nbsp; 54 ms</div>
+<pre class="res">{
+  &quot;id&quot;: &quot;162136af-6e9d-4c1d-82d6-17ce648c59c2&quot;,
+  &quot;nome&quot;: &quot;QA Automatizado&quot;,
+  &quot;cidade&quot;: &quot;Nova Serrana&quot;,
+  &quot;estado&quot;: &quot;MG&quot;,
+  &quot;nivelRiscoAtual&quot;: &quot;NORMAL&quot;,
+  &quot;ativo&quot;: true,
+  &quot;criadoEm&quot;: &quot;2026-11-19T09:28:54.242471&quot;,
+  &quot;atualizadoEm&quot;: &quot;2026-11-19T09:28:54.507826-03:00&quot;
+}</pre><ul><li class="ok">✔ Status 200</li><li class="ok">✔ Cidade atualizada</li><li class="ok">✔ Campo ativo refletido na resposta</li></ul><div class="hist">Execução 1 (código original): <b>FAIL</b> — HTTP 200 · corrigido na execução 2</div></div><div class="card pass"><div class="hd"><span class="id">CT16</span>
+<span class="t">Atualizar região inexistente</span><span class="badge pass">PASS</span></div>
+<p class="d">GUID sem registro.</p>
+<div class="line"><span class="m PUT">PUT</span><code>/api/regioes/00000000-0000-0000-0000-000000000001</code><span class="au">Authorization: Bearer &lt;JWT&gt;</span></div>
+<pre class="req">{
+  &quot;nome&quot;: &quot;X&quot;,
+  &quot;cidade&quot;: &quot;Y&quot;,
+  &quot;estado&quot;: &quot;MG&quot;,
+  &quot;ativo&quot;: true
+}</pre><div class="line"><b>Esperado:</b> HTTP 404 &nbsp;·&nbsp; <b>Obtido:</b> HTTP 404 Not Found &nbsp;·&nbsp; 8 ms</div>
+<pre class="res">{
+  &quot;type&quot;: &quot;https://tools.ietf.org/html/rfc9110#section-15.5.5&quot;,
+  &quot;title&quot;: &quot;Not Found&quot;,
+  &quot;status&quot;: 404,
+  &quot;traceId&quot;: &quot;00-2b228d20756d47ce08fe124c0693f9d6-2c53dbc9a9dc2a23-00&quot;
+}</pre><ul><li class="ok">✔ Status 404</li></ul></div><h2>03 - Sensores</h2><div class="card pass"><div class="hd"><span class="id">CT17</span>
+<span class="t">Listar sensores</span><span class="badge pass">PASS</span></div>
+<p class="d">Lista pública de sensores.</p>
+<div class="line"><span class="m GET">GET</span><code>/api/sensores</code><span class="au">sem token</span></div>
+<div class="line"><b>Esperado:</b> HTTP 200 &nbsp;·&nbsp; <b>Obtido:</b> HTTP 200 OK &nbsp;·&nbsp; 34 ms</div>
+<pre class="res">[
+  {
+    &quot;id&quot;: &quot;3b0df77f-3a60-408d-9a41-04a130b2f96d&quot;,
+    &quot;regiaoId&quot;: &quot;9a74a160-a0b6-4cee-9b51-4d1664ab9b59&quot;,
+    &quot;codigoIdentificador&quot;: &quot;QA-1795091061907&quot;,
+    &quot;tipo&quot;: &quot;PLUVIOMETRO&quot;,
+    &quot;unidadeMedida&quot;: &quot;mm&quot;,
+    &quot;limiteAtencao&quot;: 10,
+    &quot;limiteAlerta&quot;: 25,
+    &quot;limitePerigo&quot;: 55,
+    &quot;ativo&quot;: false,
+    &quot;ultimaLeitura&quot;: &quot;2026-11-19T09:24:23.916144&quot;,
+    &quot;criadoEm&quot;: &quot;2026-11-19T10:24:21.559831&quot;,
+    &quot;atualizadoEm&quot;: &quot;2026-11-19T09:24:24.803541&quot;
+  },
+  {
+    &quot;id&quot;: &quot;e39ad137-24d6-4153-bc03-92ab5ad529de&quot;,
+    &quot;regiaoId&quot;: &quot;bea18d4e-5c6d-40f0-8ff0-e6da0e8cf625&quot;,
+    &quot;codigoIdentificador&quot;: &quot;PLUV-001&quot;,
+    &quot;tipo&quot;: &quot;PLUVIOMETRO&quot;,
+    &quot;unidadeMedida&quot;: &quot;mm&quot;,
+    &quot;limiteAtencao&quot;: 10,
+    &quot;limiteAlerta&quot;: 25,
+    &quot;limitePerigo&quot;: 50,
+    &quot;ativo&quot;: true,
+    &quot;ultimaLeitura&quot;: &quot;2026-11-19T09:24:55.297788&quot;,
+    &quot;criadoEm&quot;: &quot;2026-11-10T21:30:09.746055&quot;,
+    &quot;atualizadoEm&quot;: null
+  },
+  {
+    &quot;id&quot;: &quot;99a670
+... (truncado)</pre><ul><li class="ok">✔ Status 200</li><li class="ok">✔ Tipos serializados como texto</li></ul></div><div class="card pass"><div class="hd"><span class="id">CT18</span>
+<span class="t">Obter sensor por id</span><span class="badge pass">PASS</span></div>
+<p class="d">Sensor PLUV-001 da carga inicial.</p>
+<div class="line"><span class="m GET">GET</span><code>/api/sensores/e39ad137-24d6-4153-bc03-92ab5ad529de</code><span class="au">sem token</span></div>
+<div class="line"><b>Esperado:</b> HTTP 200 &nbsp;·&nbsp; <b>Obtido:</b> HTTP 200 OK &nbsp;·&nbsp; 22 ms</div>
+<pre class="res">{
+  &quot;id&quot;: &quot;e39ad137-24d6-4153-bc03-92ab5ad529de&quot;,
+  &quot;regiaoId&quot;: &quot;bea18d4e-5c6d-40f0-8ff0-e6da0e8cf625&quot;,
+  &quot;codigoIdentificador&quot;: &quot;PLUV-001&quot;,
+  &quot;tipo&quot;: &quot;PLUVIOMETRO&quot;,
+  &quot;unidadeMedida&quot;: &quot;mm&quot;,
+  &quot;limiteAtencao&quot;: 10,
+  &quot;limiteAlerta&quot;: 25,
+  &quot;limitePerigo&quot;: 50,
+  &quot;ativo&quot;: true,
+  &quot;ultimaLeitura&quot;: &quot;2026-11-19T09:24:55.297788&quot;,
+  &quot;criadoEm&quot;: &quot;2026-11-10T21:30:09.746055&quot;,
+  &quot;atualizadoEm&quot;: null
+}</pre><ul><li class="ok">✔ Status 200</li><li class="ok">✔ Código PLUV-001</li></ul></div><div class="card pass"><div class="hd"><span class="id">CT19</span>
+<span class="t">Obter sensor inexistente</span><span class="badge pass">PASS</span></div>
+<p class="d">GUID sem registro.</p>
+<div class="line"><span class="m GET">GET</span><code>/api/sensores/00000000-0000-0000-0000-000000000001</code><span class="au">sem token</span></div>
+<div class="line"><b>Esperado:</b> HTTP 404 &nbsp;·&nbsp; <b>Obtido:</b> HTTP 404 Not Found &nbsp;·&nbsp; 8 ms</div>
+<pre class="res">{
+  &quot;type&quot;: &quot;https://tools.ietf.org/html/rfc9110#section-15.5.5&quot;,
+  &quot;title&quot;: &quot;Not Found&quot;,
+  &quot;status&quot;: 404,
+  &quot;traceId&quot;: &quot;00-87bf170f9ca99e786a31c475f01f6453-40b09f64555ad831-00&quot;
+}</pre><ul><li class="ok">✔ Status 404</li></ul></div><div class="card pass"><div class="hd"><span class="id">CT20</span>
+<span class="t">Criar sensor como cidadão</span><span class="badge pass">PASS</span></div>
+<p class="d">Cidadão não pode cadastrar sensores.</p>
+<div class="line"><span class="m POST">POST</span><code>/api/sensores</code><span class="au">Authorization: Bearer &lt;JWT&gt;</span></div>
+<pre class="req">{
+  &quot;regiaoId&quot;: &quot;{{novaRegiaoId}}&quot;,
+  &quot;codigoIdentificador&quot;: &quot;{{sensorCodigo}}&quot;,
+  &quot;tipo&quot;: &quot;PLUVIOMETRO&quot;,
+  &quot;unidadeMedida&quot;: &quot;mm&quot;,
+  &quot;limiteAtencao&quot;: 10,
+  &quot;limiteAlerta&quot;: 25,
+  &quot;limitePerigo&quot;: 50
+}</pre><div class="line"><b>Esperado:</b> HTTP 403 &nbsp;·&nbsp; <b>Obtido:</b> HTTP 403 Forbidden &nbsp;·&nbsp; 4 ms</div>
+<pre class="res"></pre><ul><li class="ok">✔ Status 403</li></ul></div><div class="card pass"><div class="hd"><span class="id">CT21</span>
+<span class="t">Criar sensor com limites fora de ordem</span><span class="badge pass">PASS</span></div>
+<p class="d">Regra de negócio: atenção &lt; alerta &lt; perigo. Esperado 400 com mensagem de validação.</p>
+<div class="line"><span class="m POST">POST</span><code>/api/sensores</code><span class="au">Authorization: Bearer &lt;JWT&gt;</span></div>
+<pre class="req">{
+  &quot;regiaoId&quot;: &quot;{{novaRegiaoId}}&quot;,
+  &quot;codigoIdentificador&quot;: &quot;{{sensorCodigo}}&quot;,
+  &quot;tipo&quot;: &quot;PLUVIOMETRO&quot;,
+  &quot;unidadeMedida&quot;: &quot;mm&quot;,
+  &quot;limiteAtencao&quot;: 60,
+  &quot;limiteAlerta&quot;: 40,
+  &quot;limitePerigo&quot;: 50
+}</pre><div class="line"><b>Esperado:</b> HTTP 400 &nbsp;·&nbsp; <b>Obtido:</b> HTTP 400 Bad Request &nbsp;·&nbsp; 27 ms</div>
+<pre class="res">{
+  &quot;mensagem&quot;: &quot;Os limites devem seguir a ordem: atenção &lt; alerta &lt; perigo&quot;
+}</pre><ul><li class="ok">✔ Status 400</li><li class="ok">✔ Mensagem explica a ordem dos limites</li></ul><div class="hist">Execução 1 (código original): <b>FAIL</b> — HTTP 500 · corrigido na execução 2</div></div><div class="card pass"><div class="hd"><span class="id">CT22</span>
+<span class="t">Criar sensor (admin)</span><span class="badge pass">PASS</span></div>
+<p class="d">Cadastro válido na região criada. Salva {{novoSensorId}}.</p>
+<div class="line"><span class="m POST">POST</span><code>/api/sensores</code><span class="au">Authorization: Bearer &lt;JWT&gt;</span></div>
+<pre class="req">{
+  &quot;regiaoId&quot;: &quot;{{novaRegiaoId}}&quot;,
+  &quot;codigoIdentificador&quot;: &quot;{{sensorCodigo}}&quot;,
+  &quot;tipo&quot;: &quot;PLUVIOMETRO&quot;,
+  &quot;unidadeMedida&quot;: &quot;mm&quot;,
+  &quot;limiteAtencao&quot;: 10,
+  &quot;limiteAlerta&quot;: 25,
+  &quot;limitePerigo&quot;: 50
+}</pre><div class="line"><b>Esperado:</b> HTTP 201 &nbsp;·&nbsp; <b>Obtido:</b> HTTP 201 Created &nbsp;·&nbsp; 132 ms</div>
+<pre class="res">{
+  &quot;id&quot;: &quot;ce894934-2a41-48ea-9920-aaca7ab3c903&quot;,
+  &quot;regiaoId&quot;: &quot;162136af-6e9d-4c1d-82d6-17ce648c59c2&quot;,
+  &quot;codigoIdentificador&quot;: &quot;QA-1795091334951&quot;,
+  &quot;tipo&quot;: &quot;PLUVIOMETRO&quot;,
+  &quot;unidadeMedida&quot;: &quot;mm&quot;,
+  &quot;limiteAtencao&quot;: 10,
+  &quot;limiteAlerta&quot;: 25,
+  &quot;limitePerigo&quot;: 50,
+  &quot;ativo&quot;: true,
+  &quot;ultimaLeitura&quot;: null,
+  &quot;criadoEm&quot;: &quot;2026-11-19T10:28:54.60366&quot;,
+  &quot;atualizadoEm&quot;: null
+}</pre><ul><li class="ok">✔ Status 201</li><li class="ok">✔ Sensor ativo por padrão</li></ul></div><div class="card pass"><div class="hd"><span class="id">CT23</span>
+<span class="t">Criar sensor com código duplicado</span><span class="badge pass">PASS</span></div>
+<p class="d">CODIGO_IDENTIFICADOR é UNIQUE. Esperado 409 Conflict (e não erro 500).</p>
+<div class="line"><span class="m POST">POST</span><code>/api/sensores</code><span class="au">Authorization: Bearer &lt;JWT&gt;</span></div>
+<pre class="req">{
+  &quot;regiaoId&quot;: &quot;{{novaRegiaoId}}&quot;,
+  &quot;codigoIdentificador&quot;: &quot;{{sensorCodigo}}&quot;,
+  &quot;tipo&quot;: &quot;PLUVIOMETRO&quot;,
+  &quot;unidadeMedida&quot;: &quot;mm&quot;,
+  &quot;limiteAtencao&quot;: 10,
+  &quot;limiteAlerta&quot;: 25,
+  &quot;limitePerigo&quot;: 50
+}</pre><div class="line"><b>Esperado:</b> HTTP 409 &nbsp;·&nbsp; <b>Obtido:</b> HTTP 409 Conflict &nbsp;·&nbsp; 19 ms</div>
+<pre class="res">{
+  &quot;mensagem&quot;: &quot;Já existe um sensor com o código &#x27;QA-1795091334951&#x27;.&quot;
+}</pre><ul><li class="ok">✔ Status 409</li></ul><div class="hist">Execução 1 (código original): <b>FAIL</b> — HTTP 500 · corrigido na execução 2</div></div><div class="card pass"><div class="hd"><span class="id">CT24</span>
+<span class="t">Atualizar sensor sem token</span><span class="badge pass">PASS</span></div>
+<p class="d">Sem autenticação.</p>
+<div class="line"><span class="m PUT">PUT</span><code>/api/sensores/ce894934-2a41-48ea-9920-aaca7ab3c903</code><span class="au">sem token</span></div>
+<pre class="req">{
+  &quot;regiaoId&quot;: &quot;{{novaRegiaoId}}&quot;,
+  &quot;codigoIdentificador&quot;: &quot;{{sensorCodigo}}&quot;,
+  &quot;tipo&quot;: &quot;PLUVIOMETRO&quot;,
+  &quot;unidadeMedida&quot;: &quot;mm&quot;,
+  &quot;limiteAtencao&quot;: 10,
+  &quot;limiteAlerta&quot;: 25,
+  &quot;limitePerigo&quot;: 50
+}</pre><div class="line"><b>Esperado:</b> HTTP 401 &nbsp;·&nbsp; <b>Obtido:</b> HTTP 401 Unauthorized &nbsp;·&nbsp; 5 ms</div>
+<pre class="res"></pre><ul><li class="ok">✔ Status 401</li></ul></div><div class="card pass"><div class="hd"><span class="id">CT25</span>
+<span class="t">Atualizar sensor (admin)</span><span class="badge pass">PASS</span></div>
+<p class="d">Ajusta limites do sensor criado.</p>
+<div class="line"><span class="m PUT">PUT</span><code>/api/sensores/ce894934-2a41-48ea-9920-aaca7ab3c903</code><span class="au">Authorization: Bearer &lt;JWT&gt;</span></div>
+<pre class="req">{
+  &quot;regiaoId&quot;: &quot;{{novaRegiaoId}}&quot;,
+  &quot;codigoIdentificador&quot;: &quot;{{sensorCodigo}}&quot;,
+  &quot;tipo&quot;: &quot;PLUVIOMETRO&quot;,
+  &quot;unidadeMedida&quot;: &quot;mm&quot;,
+  &quot;limiteAtencao&quot;: 10,
+  &quot;limiteAlerta&quot;: 25,
+  &quot;limitePerigo&quot;: 55,
+  &quot;ativo&quot;: true
+}</pre><div class="line"><b>Esperado:</b> HTTP 200 &nbsp;·&nbsp; <b>Obtido:</b> HTTP 200 OK &nbsp;·&nbsp; 58 ms</div>
+<pre class="res">{
+  &quot;id&quot;: &quot;ce894934-2a41-48ea-9920-aaca7ab3c903&quot;,
+  &quot;regiaoId&quot;: &quot;162136af-6e9d-4c1d-82d6-17ce648c59c2&quot;,
+  &quot;codigoIdentificador&quot;: &quot;QA-1795091334951&quot;,
+  &quot;tipo&quot;: &quot;PLUVIOMETRO&quot;,
+  &quot;unidadeMedida&quot;: &quot;mm&quot;,
+  &quot;limiteAtencao&quot;: 10,
+  &quot;limiteAlerta&quot;: 25,
+  &quot;limitePerigo&quot;: 55,
+  &quot;ativo&quot;: true,
+  &quot;ultimaLeitura&quot;: null,
+  &quot;criadoEm&quot;: &quot;2026-11-19T10:28:54.60366&quot;,
+  &quot;atualizadoEm&quot;: &quot;2026-11-19T09:28:55.5621901-03:00&quot;
+}</pre><ul><li class="ok">✔ Status 200</li><li class="ok">✔ Limite de perigo atualizado</li></ul></div><h2>04 - Medições e geração de alertas</h2><div class="card pass"><div class="hd"><span class="id">CT26</span>
+<span class="t">Enviar medição sem API Key</span><span class="badge pass">PASS</span></div>
+<p class="d">Header X-API-Key ausente.</p>
+<div class="line"><span class="m POST">POST</span><code>/api/medicoes</code><span class="au">sem token</span></div>
+<pre class="req">{
+  &quot;sensorId&quot;: &quot;{{novoSensorId}}&quot;,
+  &quot;valor&quot;: 5
+}</pre><div class="line"><b>Esperado:</b> HTTP 401 &nbsp;·&nbsp; <b>Obtido:</b> HTTP 401 Unauthorized &nbsp;·&nbsp; 8 ms</div>
+<pre class="res">API Key inválida ou não informada.</pre><ul><li class="ok">✔ Status 401</li></ul></div><div class="card pass"><div class="hd"><span class="id">CT27</span>
+<span class="t">Enviar medição com API Key inválida</span><span class="badge pass">PASS</span></div>
+<p class="d">Chave incorreta (comparação em tempo constante).</p>
+<div class="line"><span class="m POST">POST</span><code>/api/medicoes</code><span class="au">sem token · X-API-Key</span></div>
+<pre class="req">{
+  &quot;sensorId&quot;: &quot;{{novoSensorId}}&quot;,
+  &quot;valor&quot;: 5
+}</pre><div class="line"><b>Esperado:</b> HTTP 401 &nbsp;·&nbsp; <b>Obtido:</b> HTTP 401 Unauthorized &nbsp;·&nbsp; 3 ms</div>
+<pre class="res">API Key inválida ou não informada.</pre><ul><li class="ok">✔ Status 401</li></ul></div><div class="card pass"><div class="hd"><span class="id">CT28</span>
+<span class="t">Enviar medição com valor negativo</span><span class="badge pass">PASS</span></div>
+<p class="d">Validação de domínio do valor.</p>
+<div class="line"><span class="m POST">POST</span><code>/api/medicoes</code><span class="au">sem token · X-API-Key</span></div>
+<pre class="req">{
+  &quot;sensorId&quot;: &quot;{{novoSensorId}}&quot;,
+  &quot;valor&quot;: -3
+}</pre><div class="line"><b>Esperado:</b> HTTP 400 &nbsp;·&nbsp; <b>Obtido:</b> HTTP 400 Bad Request &nbsp;·&nbsp; 6 ms</div>
+<pre class="res">{
+  &quot;mensagem&quot;: &quot;O valor da medição não pode ser negativo.&quot;
+}</pre><ul><li class="ok">✔ Status 400</li><li class="ok">✔ Mensagem de validação</li></ul></div><div class="card pass"><div class="hd"><span class="id">CT29</span>
+<span class="t">Enviar medição para sensor inexistente</span><span class="badge pass">PASS</span></div>
+<p class="d">Sensor não cadastrado.</p>
+<div class="line"><span class="m POST">POST</span><code>/api/medicoes</code><span class="au">sem token · X-API-Key</span></div>
+<pre class="req">{
+  &quot;sensorId&quot;: &quot;00000000-0000-0000-0000-000000000001&quot;,
+  &quot;valor&quot;: 5
+}</pre><div class="line"><b>Esperado:</b> HTTP 400 &nbsp;·&nbsp; <b>Obtido:</b> HTTP 400 Bad Request &nbsp;·&nbsp; 11 ms</div>
+<pre class="res">{
+  &quot;mensagem&quot;: &quot;O sensor informado não existe ou está inativo.&quot;
+}</pre><ul><li class="ok">✔ Status 400</li><li class="ok">✔ Mensagem de sensor inexistente</li></ul></div><div class="card pass"><div class="hd"><span class="id">CT30</span>
+<span class="t">Medição NORMAL (5 mm)</span><span class="badge pass">PASS</span></div>
+<p class="d">Valor abaixo do limite de atenção.</p>
+<div class="line"><span class="m POST">POST</span><code>/api/medicoes</code><span class="au">sem token · X-API-Key</span></div>
+<pre class="req">{
+  &quot;sensorId&quot;: &quot;{{novoSensorId}}&quot;,
+  &quot;valor&quot;: 5
+}</pre><div class="line"><b>Esperado:</b> HTTP 201 &nbsp;·&nbsp; <b>Obtido:</b> HTTP 201 Created &nbsp;·&nbsp; 115 ms</div>
+<pre class="res">{
+  &quot;mensagem&quot;: &quot;Medição Recebida com Sucesso.&quot;
+}</pre><ul><li class="ok">✔ Status 201</li></ul></div><div class="card pass"><div class="hd"><span class="id">CT31</span>
+<span class="t">Região permanece NORMAL</span><span class="badge pass">PASS</span></div>
+<p class="d">Nenhum alerta deve ser aberto.</p>
+<div class="line"><span class="m GET">GET</span><code>/api/regioes/162136af-6e9d-4c1d-82d6-17ce648c59c2</code><span class="au">sem token</span></div>
+<div class="line"><b>Esperado:</b> HTTP 200 &nbsp;·&nbsp; <b>Obtido:</b> HTTP 200 OK &nbsp;·&nbsp; 7 ms</div>
+<pre class="res">{
+  &quot;id&quot;: &quot;162136af-6e9d-4c1d-82d6-17ce648c59c2&quot;,
+  &quot;nome&quot;: &quot;QA Automatizado&quot;,
+  &quot;cidade&quot;: &quot;Nova Serrana&quot;,
+  &quot;estado&quot;: &quot;MG&quot;,
+  &quot;nivelRiscoAtual&quot;: &quot;NORMAL&quot;,
+  &quot;ativo&quot;: true,
+  &quot;criadoEm&quot;: &quot;2026-11-19T09:28:54.242471&quot;,
+  &quot;atualizadoEm&quot;: &quot;2026-11-19T09:28:55.95622&quot;
+}</pre><ul><li class="ok">✔ Status 200</li><li class="ok">✔ nivelRiscoAtual = NORMAL</li></ul></div><div class="card pass"><div class="hd"><span class="id">CT32</span>
+<span class="t">Medição de PERIGO (72,5 mm)</span><span class="badge pass">PASS</span></div>
+<p class="d">Valor acima do limite de perigo (55).</p>
+<div class="line"><span class="m POST">POST</span><code>/api/medicoes</code><span class="au">sem token · X-API-Key</span></div>
+<pre class="req">{
+  &quot;sensorId&quot;: &quot;{{novoSensorId}}&quot;,
+  &quot;valor&quot;: 72.5
+}</pre><div class="line"><b>Esperado:</b> HTTP 201 &nbsp;·&nbsp; <b>Obtido:</b> HTTP 201 Created &nbsp;·&nbsp; 59 ms</div>
+<pre class="res">{
+  &quot;mensagem&quot;: &quot;Medição Recebida com Sucesso.&quot;
+}</pre><ul><li class="ok">✔ Status 201</li></ul></div><div class="card pass"><div class="hd"><span class="id">CT33</span>
+<span class="t">Região elevada para PERIGO</span><span class="badge pass">PASS</span></div>
+<p class="d">Risco da região recalculado pelos alertas ativos.</p>
+<div class="line"><span class="m GET">GET</span><code>/api/regioes/162136af-6e9d-4c1d-82d6-17ce648c59c2</code><span class="au">sem token</span></div>
+<div class="line"><b>Esperado:</b> HTTP 200 &nbsp;·&nbsp; <b>Obtido:</b> HTTP 200 OK &nbsp;·&nbsp; 13 ms</div>
+<pre class="res">{
+  &quot;id&quot;: &quot;162136af-6e9d-4c1d-82d6-17ce648c59c2&quot;,
+  &quot;nome&quot;: &quot;QA Automatizado&quot;,
+  &quot;cidade&quot;: &quot;Nova Serrana&quot;,
+  &quot;estado&quot;: &quot;MG&quot;,
+  &quot;nivelRiscoAtual&quot;: &quot;PERIGO&quot;,
+  &quot;ativo&quot;: true,
+  &quot;criadoEm&quot;: &quot;2026-11-19T09:28:54.242471&quot;,
+  &quot;atualizadoEm&quot;: &quot;2026-11-19T09:28:56.19192&quot;
+}</pre><ul><li class="ok">✔ Status 200</li><li class="ok">✔ nivelRiscoAtual = PERIGO</li></ul></div><div class="card pass"><div class="hd"><span class="id">CT34</span>
+<span class="t">Alerta PERIGO criado automaticamente</span><span class="badge pass">PASS</span></div>
+<p class="d">Procura alerta ativo do sensor de teste. Salva {{alertaId}}.</p>
+<div class="line"><span class="m GET">GET</span><code>/api/alertas</code><span class="au">sem token</span></div>
+<div class="line"><b>Esperado:</b> HTTP 200 &nbsp;·&nbsp; <b>Obtido:</b> HTTP 200 OK &nbsp;·&nbsp; 58 ms</div>
+<pre class="res">[
+  {
+    &quot;id&quot;: &quot;88cc153c-f4bd-472c-abc7-54c402112b10&quot;,
+    &quot;regiaoId&quot;: &quot;162136af-6e9d-4c1d-82d6-17ce648c59c2&quot;,
+    &quot;nomeRegiao&quot;: &quot;QA Automatizado&quot;,
+    &quot;sensorId&quot;: &quot;ce894934-2a41-48ea-9920-aaca7ab3c903&quot;,
+    &quot;codigoIdentificador&quot;: &quot;QA-1795091334951&quot;,
+    &quot;nivel&quot;: &quot;PERIGO&quot;,
+    &quot;status&quot;: &quot;ATIVO&quot;,
+    &quot;titulo&quot;: &quot;Alerta de perigo&quot;,
+    &quot;descricao&quot;: null,
+    &quot;ativo&quot;: true,
+    &quot;dataEmissao&quot;: &quot;2026-11-19T09:28:56.19192&quot;,
+    &quot;dataUltimaOcorrencia&quot;: &quot;2026-11-19T09:28:56.19192&quot;,
+    &quot;dataResolucao&quot;: null
+  },
+  {
+    &quot;id&quot;: &quot;6d72a621-9fec-400c-a3d7-9e95e49a1281&quot;,
+    &quot;regiaoId&quot;: &quot;bea18d4e-5c6d-40f0-8ff0-e6da0e8cf625&quot;,
+    &quot;nomeRegiao&quot;: &quot;Centro&quot;,
+    &quot;sensorId&quot;: &quot;e39ad137-24d6-4153-bc03-92ab5ad529de&quot;,
+    &quot;codigoIdentificador&quot;: &quot;PLUV-001&quot;,
+    &quot;nivel&quot;: &quot;PERIGO&quot;,
+    &quot;status&quot;: &quot;RESOLVIDO_AUTO&quot;,
+    &quot;titulo&quot;: &quot;Alerta de perigo&quot;,
+    &quot;descricao&quot;: null,
+    &quot;ativo&quot;: false,
+    &quot;dataEmissao&quot;: &quot;2026-
+... (truncado)</pre><ul><li class="ok">✔ Status 200</li><li class="ok">✔ Existe alerta ativo para o sensor</li><li class="ok">✔ Nível PERIGO / status ATIVO</li></ul></div><div class="card pass"><div class="hd"><span class="id">CT35</span>
+<span class="t">Listar medições</span><span class="badge pass">PASS</span></div>
+<p class="d">Lista ordenada da mais recente para a mais antiga. Salva {{medicaoId}}.</p>
+<div class="line"><span class="m GET">GET</span><code>/api/medicoes</code><span class="au">sem token</span></div>
+<div class="line"><b>Esperado:</b> HTTP 200 &nbsp;·&nbsp; <b>Obtido:</b> HTTP 200 OK &nbsp;·&nbsp; 25 ms</div>
+<pre class="res">[
+  {
+    &quot;id&quot;: &quot;b3b3e269-42b8-47e0-9aa5-d472ab57437a&quot;,
+    &quot;sensorId&quot;: &quot;ce894934-2a41-48ea-9920-aaca7ab3c903&quot;,
+    &quot;codigoIdentificador&quot;: &quot;QA-1795091334951&quot;,
+    &quot;unidadeMedida&quot;: &quot;mm&quot;,
+    &quot;valor&quot;: 72.5,
+    &quot;dataHora&quot;: &quot;2026-11-19T09:28:56.19192&quot;
+  },
+  {
+    &quot;id&quot;: &quot;4e9d8758-2558-46e6-afde-974cedac0db0&quot;,
+    &quot;sensorId&quot;: &quot;ce894934-2a41-48ea-9920-aaca7ab3c903&quot;,
+    &quot;codigoIdentificador&quot;: &quot;QA-1795091334951&quot;,
+    &quot;unidadeMedida&quot;: &quot;mm&quot;,
+    &quot;valor&quot;: 5,
+    &quot;dataHora&quot;: &quot;2026-11-19T09:28:55.95622&quot;
+  },
+  {
+    &quot;id&quot;: &quot;b828f0d9-2b59-43e7-a6fe-ebe7330fa965&quot;,
+    &quot;sensorId&quot;: &quot;99a670e0-5c6c-4310-9ce5-9753fe764c63&quot;,
+    &quot;codigoIdentificador&quot;: &quot;NIVEL-001&quot;,
+    &quot;unidadeMedida&quot;: &quot;cm&quot;,
+    &quot;valor&quot;: 1.1,
+    &quot;dataHora&quot;: &quot;2026-11-19T09:24:57.336521&quot;
+  },
+  {
+    &quot;id&quot;: &quot;52b05b13-0d06-4822-a003-8feb223a9ba0&quot;,
+    &quot;sensorId&quot;: &quot;e39ad137-24d6-4153-bc03-92ab5ad529de&quot;,
+    &quot;codigoIdentificador&quot;: &quot;PLUV-001&quot;,
+   
+... (truncado)</pre><ul><li class="ok">✔ Status 200</li><li class="ok">✔ Medição de teste registrada</li></ul></div><div class="card pass"><div class="hd"><span class="id">CT36</span>
+<span class="t">Obter medição por id</span><span class="badge pass">PASS</span></div>
+<p class="d">Detalhe com unidade de medida.</p>
+<div class="line"><span class="m GET">GET</span><code>/api/medicoes/b3b3e269-42b8-47e0-9aa5-d472ab57437a</code><span class="au">sem token</span></div>
+<div class="line"><b>Esperado:</b> HTTP 200 &nbsp;·&nbsp; <b>Obtido:</b> HTTP 200 OK &nbsp;·&nbsp; 17 ms</div>
+<pre class="res">{
+  &quot;id&quot;: &quot;b3b3e269-42b8-47e0-9aa5-d472ab57437a&quot;,
+  &quot;sensorId&quot;: &quot;ce894934-2a41-48ea-9920-aaca7ab3c903&quot;,
+  &quot;codigoIdentificador&quot;: &quot;QA-1795091334951&quot;,
+  &quot;unidadeMedida&quot;: &quot;mm&quot;,
+  &quot;valor&quot;: 72.5,
+  &quot;dataHora&quot;: &quot;2026-11-19T09:28:56.19192&quot;
+}</pre><ul><li class="ok">✔ Status 200</li><li class="ok">✔ Unidade mm</li></ul></div><div class="card pass"><div class="hd"><span class="id">CT37</span>
+<span class="t">Obter medição inexistente</span><span class="badge pass">PASS</span></div>
+<p class="d">GUID sem registro.</p>
+<div class="line"><span class="m GET">GET</span><code>/api/medicoes/00000000-0000-0000-0000-000000000001</code><span class="au">sem token</span></div>
+<div class="line"><b>Esperado:</b> HTTP 404 &nbsp;·&nbsp; <b>Obtido:</b> HTTP 404 Not Found &nbsp;·&nbsp; 6 ms</div>
+<pre class="res">{
+  &quot;type&quot;: &quot;https://tools.ietf.org/html/rfc9110#section-15.5.5&quot;,
+  &quot;title&quot;: &quot;Not Found&quot;,
+  &quot;status&quot;: 404,
+  &quot;traceId&quot;: &quot;00-d09c57402f092a870cdca603b484d9c5-6d355760dc5b8576-00&quot;
+}</pre><ul><li class="ok">✔ Status 404</li></ul></div><div class="card pass"><div class="hd"><span class="id">CT38</span>
+<span class="t">Medição volta ao normal (4 mm)</span><span class="badge pass">PASS</span></div>
+<p class="d">Deve resolver o alerta automaticamente.</p>
+<div class="line"><span class="m POST">POST</span><code>/api/medicoes</code><span class="au">sem token · X-API-Key</span></div>
+<pre class="req">{
+  &quot;sensorId&quot;: &quot;{{novoSensorId}}&quot;,
+  &quot;valor&quot;: 4
+}</pre><div class="line"><b>Esperado:</b> HTTP 201 &nbsp;·&nbsp; <b>Obtido:</b> HTTP 201 Created &nbsp;·&nbsp; 35 ms</div>
+<pre class="res">{
+  &quot;mensagem&quot;: &quot;Medição Recebida com Sucesso.&quot;
+}</pre><ul><li class="ok">✔ Status 201</li></ul></div><div class="card pass"><div class="hd"><span class="id">CT39</span>
+<span class="t">Alerta resolvido automaticamente</span><span class="badge pass">PASS</span></div>
+<p class="d">Status RESOLVIDO_AUTO e data de resolução.</p>
+<div class="line"><span class="m GET">GET</span><code>/api/alertas/88cc153c-f4bd-472c-abc7-54c402112b10</code><span class="au">sem token</span></div>
+<div class="line"><b>Esperado:</b> HTTP 200 &nbsp;·&nbsp; <b>Obtido:</b> HTTP 200 OK &nbsp;·&nbsp; 25 ms</div>
+<pre class="res">{
+  &quot;id&quot;: &quot;88cc153c-f4bd-472c-abc7-54c402112b10&quot;,
+  &quot;regiaoId&quot;: &quot;162136af-6e9d-4c1d-82d6-17ce648c59c2&quot;,
+  &quot;nomeRegiao&quot;: &quot;QA Automatizado&quot;,
+  &quot;sensorId&quot;: &quot;ce894934-2a41-48ea-9920-aaca7ab3c903&quot;,
+  &quot;codigoIdentificador&quot;: &quot;QA-1795091334951&quot;,
+  &quot;nivel&quot;: &quot;PERIGO&quot;,
+  &quot;status&quot;: &quot;RESOLVIDO_AUTO&quot;,
+  &quot;titulo&quot;: &quot;Alerta de perigo&quot;,
+  &quot;descricao&quot;: null,
+  &quot;ativo&quot;: false,
+  &quot;dataEmissao&quot;: &quot;2026-11-19T09:28:56.19192&quot;,
+  &quot;dataUltimaOcorrencia&quot;: &quot;2026-11-19T09:28:56.810223&quot;,
+  &quot;dataResolucao&quot;: &quot;2026-11-19T09:28:56.810223&quot;
+}</pre><ul><li class="ok">✔ Status 200</li><li class="ok">✔ Status RESOLVIDO_AUTO</li><li class="ok">✔ Inativo com data de resolução</li></ul></div><div class="card pass"><div class="hd"><span class="id">CT40</span>
+<span class="t">Região volta para NORMAL</span><span class="badge pass">PASS</span></div>
+<p class="d">Sem alertas ativos.</p>
+<div class="line"><span class="m GET">GET</span><code>/api/regioes/162136af-6e9d-4c1d-82d6-17ce648c59c2</code><span class="au">sem token</span></div>
+<div class="line"><b>Esperado:</b> HTTP 200 &nbsp;·&nbsp; <b>Obtido:</b> HTTP 200 OK &nbsp;·&nbsp; 11 ms</div>
+<pre class="res">{
+  &quot;id&quot;: &quot;162136af-6e9d-4c1d-82d6-17ce648c59c2&quot;,
+  &quot;nome&quot;: &quot;QA Automatizado&quot;,
+  &quot;cidade&quot;: &quot;Nova Serrana&quot;,
+  &quot;estado&quot;: &quot;MG&quot;,
+  &quot;nivelRiscoAtual&quot;: &quot;NORMAL&quot;,
+  &quot;ativo&quot;: true,
+  &quot;criadoEm&quot;: &quot;2026-11-19T09:28:54.242471&quot;,
+  &quot;atualizadoEm&quot;: &quot;2026-11-19T09:28:56.810223&quot;
+}</pre><ul><li class="ok">✔ Status 200</li><li class="ok">✔ nivelRiscoAtual = NORMAL</li></ul></div><h2>05 - Alertas</h2><div class="card pass"><div class="hd"><span class="id">CT41</span>
+<span class="t">Listar alertas</span><span class="badge pass">PASS</span></div>
+<p class="d">Ordenados por data de emissão (desc).</p>
+<div class="line"><span class="m GET">GET</span><code>/api/alertas</code><span class="au">sem token</span></div>
+<div class="line"><b>Esperado:</b> HTTP 200 &nbsp;·&nbsp; <b>Obtido:</b> HTTP 200 OK &nbsp;·&nbsp; 34 ms</div>
+<pre class="res">[
+  {
+    &quot;id&quot;: &quot;88cc153c-f4bd-472c-abc7-54c402112b10&quot;,
+    &quot;regiaoId&quot;: &quot;162136af-6e9d-4c1d-82d6-17ce648c59c2&quot;,
+    &quot;nomeRegiao&quot;: &quot;QA Automatizado&quot;,
+    &quot;sensorId&quot;: &quot;ce894934-2a41-48ea-9920-aaca7ab3c903&quot;,
+    &quot;codigoIdentificador&quot;: &quot;QA-1795091334951&quot;,
+    &quot;nivel&quot;: &quot;PERIGO&quot;,
+    &quot;status&quot;: &quot;RESOLVIDO_AUTO&quot;,
+    &quot;titulo&quot;: &quot;Alerta de perigo&quot;,
+    &quot;descricao&quot;: null,
+    &quot;ativo&quot;: false,
+    &quot;dataEmissao&quot;: &quot;2026-11-19T09:28:56.19192&quot;,
+    &quot;dataUltimaOcorrencia&quot;: &quot;2026-11-19T09:28:56.810223&quot;,
+    &quot;dataResolucao&quot;: &quot;2026-11-19T09:28:56.810223&quot;
+  },
+  {
+    &quot;id&quot;: &quot;6d72a621-9fec-400c-a3d7-9e95e49a1281&quot;,
+    &quot;regiaoId&quot;: &quot;bea18d4e-5c6d-40f0-8ff0-e6da0e8cf625&quot;,
+    &quot;nomeRegiao&quot;: &quot;Centro&quot;,
+    &quot;sensorId&quot;: &quot;e39ad137-24d6-4153-bc03-92ab5ad529de&quot;,
+    &quot;codigoIdentificador&quot;: &quot;PLUV-001&quot;,
+    &quot;nivel&quot;: &quot;PERIGO&quot;,
+    &quot;status&quot;: &quot;RESOLVIDO_AUTO&quot;,
+    &quot;titulo&quot;: &quot;Alerta de perigo&quot;,
+    &quot;descricao&quot;: null,
+    &quot;ativo
+... (truncado)</pre><ul><li class="ok">✔ Status 200</li><li class="ok">✔ Retorna array</li></ul></div><div class="card pass"><div class="hd"><span class="id">CT42</span>
+<span class="t">Obter alerta inexistente</span><span class="badge pass">PASS</span></div>
+<p class="d">GUID sem registro.</p>
+<div class="line"><span class="m GET">GET</span><code>/api/alertas/00000000-0000-0000-0000-000000000001</code><span class="au">sem token</span></div>
+<div class="line"><b>Esperado:</b> HTTP 404 &nbsp;·&nbsp; <b>Obtido:</b> HTTP 404 Not Found &nbsp;·&nbsp; 6 ms</div>
+<pre class="res">{
+  &quot;type&quot;: &quot;https://tools.ietf.org/html/rfc9110#section-15.5.5&quot;,
+  &quot;title&quot;: &quot;Not Found&quot;,
+  &quot;status&quot;: 404,
+  &quot;traceId&quot;: &quot;00-c60bf771c71f571120406196f496a7f4-6a0f89986cfb0338-00&quot;
+}</pre><ul><li class="ok">✔ Status 404</li></ul></div><div class="card pass"><div class="hd"><span class="id">CT43</span>
+<span class="t">Excluir alerta sem token</span><span class="badge pass">PASS</span></div>
+<p class="d">Sem autenticação.</p>
+<div class="line"><span class="m DELETE">DELETE</span><code>/api/alertas/88cc153c-f4bd-472c-abc7-54c402112b10</code><span class="au">sem token</span></div>
+<div class="line"><b>Esperado:</b> HTTP 401 &nbsp;·&nbsp; <b>Obtido:</b> HTTP 401 Unauthorized &nbsp;·&nbsp; 2 ms</div>
+<pre class="res"></pre><ul><li class="ok">✔ Status 401</li></ul></div><div class="card pass"><div class="hd"><span class="id">CT44</span>
+<span class="t">Excluir alerta como cidadão</span><span class="badge pass">PASS</span></div>
+<p class="d">Perfil sem permissão.</p>
+<div class="line"><span class="m DELETE">DELETE</span><code>/api/alertas/88cc153c-f4bd-472c-abc7-54c402112b10</code><span class="au">Authorization: Bearer &lt;JWT&gt;</span></div>
+<div class="line"><b>Esperado:</b> HTTP 403 &nbsp;·&nbsp; <b>Obtido:</b> HTTP 403 Forbidden &nbsp;·&nbsp; 2 ms</div>
+<pre class="res"></pre><ul><li class="ok">✔ Status 403</li></ul></div><div class="card pass"><div class="hd"><span class="id">CT45</span>
+<span class="t">Excluir alerta com token adulterado</span><span class="badge pass">PASS</span></div>
+<p class="d">Assinatura do JWT alterada: a validação de IssuerSigningKey deve rejeitar.</p>
+<div class="line"><span class="m DELETE">DELETE</span><code>/api/alertas/88cc153c-f4bd-472c-abc7-54c402112b10</code><span class="au">Authorization: Bearer &lt;JWT&gt;</span></div>
+<div class="line"><b>Esperado:</b> HTTP 401 &nbsp;·&nbsp; <b>Obtido:</b> HTTP 401 Unauthorized &nbsp;·&nbsp; 4 ms</div>
+<pre class="res"></pre><ul><li class="ok">✔ Status 401</li></ul></div><div class="card pass"><div class="hd"><span class="id">CT46</span>
+<span class="t">Excluir alerta (admin)</span><span class="badge pass">PASS</span></div>
+<p class="d">Exclusão definitiva.</p>
+<div class="line"><span class="m DELETE">DELETE</span><code>/api/alertas/88cc153c-f4bd-472c-abc7-54c402112b10</code><span class="au">Authorization: Bearer &lt;JWT&gt;</span></div>
+<div class="line"><b>Esperado:</b> HTTP 204 &nbsp;·&nbsp; <b>Obtido:</b> HTTP 204 No Content &nbsp;·&nbsp; 40 ms</div>
+<pre class="res"></pre><ul><li class="ok">✔ Status 204</li></ul></div><div class="card pass"><div class="hd"><span class="id">CT47</span>
+<span class="t">Excluir alerta já excluído</span><span class="badge pass">PASS</span></div>
+<p class="d">Idempotência: recurso não existe mais.</p>
+<div class="line"><span class="m DELETE">DELETE</span><code>/api/alertas/88cc153c-f4bd-472c-abc7-54c402112b10</code><span class="au">Authorization: Bearer &lt;JWT&gt;</span></div>
+<div class="line"><b>Esperado:</b> HTTP 404 &nbsp;·&nbsp; <b>Obtido:</b> HTTP 404 Not Found &nbsp;·&nbsp; 8 ms</div>
+<pre class="res">{
+  &quot;type&quot;: &quot;https://tools.ietf.org/html/rfc9110#section-15.5.5&quot;,
+  &quot;title&quot;: &quot;Not Found&quot;,
+  &quot;status&quot;: 404,
+  &quot;traceId&quot;: &quot;00-7b386b7eece31818009d8c86a266929e-4b1a7ddc23a0e171-00&quot;
+}</pre><ul><li class="ok">✔ Status 404</li></ul></div><h2>06 - Limpeza</h2><div class="card pass"><div class="hd"><span class="id">CT48</span>
+<span class="t">Desativar sensor de teste</span><span class="badge pass">PASS</span></div>
+<p class="d">ativo=false.</p>
+<div class="line"><span class="m PUT">PUT</span><code>/api/sensores/ce894934-2a41-48ea-9920-aaca7ab3c903</code><span class="au">Authorization: Bearer &lt;JWT&gt;</span></div>
+<pre class="req">{
+  &quot;regiaoId&quot;: &quot;{{novaRegiaoId}}&quot;,
+  &quot;codigoIdentificador&quot;: &quot;{{sensorCodigo}}&quot;,
+  &quot;tipo&quot;: &quot;PLUVIOMETRO&quot;,
+  &quot;unidadeMedida&quot;: &quot;mm&quot;,
+  &quot;limiteAtencao&quot;: 10,
+  &quot;limiteAlerta&quot;: 25,
+  &quot;limitePerigo&quot;: 55,
+  &quot;ativo&quot;: false
+}</pre><div class="line"><b>Esperado:</b> HTTP 200 &nbsp;·&nbsp; <b>Obtido:</b> HTTP 200 OK &nbsp;·&nbsp; 36 ms</div>
+<pre class="res">{
+  &quot;id&quot;: &quot;ce894934-2a41-48ea-9920-aaca7ab3c903&quot;,
+  &quot;regiaoId&quot;: &quot;162136af-6e9d-4c1d-82d6-17ce648c59c2&quot;,
+  &quot;codigoIdentificador&quot;: &quot;QA-1795091334951&quot;,
+  &quot;tipo&quot;: &quot;PLUVIOMETRO&quot;,
+  &quot;unidadeMedida&quot;: &quot;mm&quot;,
+  &quot;limiteAtencao&quot;: 10,
+  &quot;limiteAlerta&quot;: 25,
+  &quot;limitePerigo&quot;: 55,
+  &quot;ativo&quot;: false,
+  &quot;ultimaLeitura&quot;: &quot;2026-11-19T09:28:56.810223&quot;,
+  &quot;criadoEm&quot;: &quot;2026-11-19T10:28:54.60366&quot;,
+  &quot;atualizadoEm&quot;: &quot;2026-11-19T09:28:57.737852-03:00&quot;
+}</pre><ul><li class="ok">✔ Status 200</li><li class="ok">✔ Sensor inativo</li></ul></div><div class="card pass"><div class="hd"><span class="id">CT49</span>
+<span class="t">Desativar região de teste</span><span class="badge pass">PASS</span></div>
+<p class="d">ativo=false.</p>
+<div class="line"><span class="m PUT">PUT</span><code>/api/regioes/162136af-6e9d-4c1d-82d6-17ce648c59c2</code><span class="au">Authorization: Bearer &lt;JWT&gt;</span></div>
+<pre class="req">{
+  &quot;nome&quot;: &quot;QA Automatizado&quot;,
+  &quot;cidade&quot;: &quot;Nova Serrana&quot;,
+  &quot;estado&quot;: &quot;MG&quot;,
+  &quot;ativo&quot;: false
+}</pre><div class="line"><b>Esperado:</b> HTTP 200 &nbsp;·&nbsp; <b>Obtido:</b> HTTP 200 OK &nbsp;·&nbsp; 20 ms</div>
+<pre class="res">{
+  &quot;id&quot;: &quot;162136af-6e9d-4c1d-82d6-17ce648c59c2&quot;,
+  &quot;nome&quot;: &quot;QA Automatizado&quot;,
+  &quot;cidade&quot;: &quot;Nova Serrana&quot;,
+  &quot;estado&quot;: &quot;MG&quot;,
+  &quot;nivelRiscoAtual&quot;: &quot;NORMAL&quot;,
+  &quot;ativo&quot;: false,
+  &quot;criadoEm&quot;: &quot;2026-11-19T09:28:54.242471&quot;,
+  &quot;atualizadoEm&quot;: &quot;2026-11-19T09:28:57.8165832-03:00&quot;
+}</pre><ul><li class="ok">✔ Status 200</li></ul></div></main></body></html>

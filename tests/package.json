@@ -1,0 +1,12 @@
+{
+  "name": "alertaja-api-tests",
+  "private": true,
+  "description": "Testes automatizados da API AlertaJá (Postman Collection executada com Newman)",
+  "scripts": {
+    "test": "newman run AlertaJa.postman_collection.json -e AlertaJa.postman_environment.json -k -r cli,htmlextra,junit --reporter-htmlextra-export relatorios/ultima-execucao.html --reporter-junit-export relatorios/ultima-execucao.xml"
+  },
+  "devDependencies": {
+    "newman": "6.2.3",
+    "newman-reporter-htmlextra": "1.23.1"
+  }
+}

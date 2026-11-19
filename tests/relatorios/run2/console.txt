@@ -1,0 +1,260 @@
+(node:14376) [DEP0176] DeprecationWarning: fs.F_OK is deprecated, use fs.constants.F_OK instead
+(Use `node --trace-deprecation ...` to show where the warning was created)
+AlertaJá API - Global Solution 2026/2
+
+□ 00 - Status
+└ CT01 - Status da API
+  GET https://localhost:7275/api/status [200 OK, 204B, 34ms]
+  √  Status 200
+  √  Sistema online
+
+□ 01 - Autenticação
+└ CT02 - Login administrador (válido)
+  POST https://localhost:7275/api/auth/login [200 OK, 909B, 1307ms]
+  √  Status 200
+  √  Retorna token JWT
+  √  Perfil ROLE_ADMIN
+  √  Resposta não expõe a senha
+
+└ CT03 - Login cidadão (válido)
+  POST https://localhost:7275/api/auth/login [200 OK, 903B, 103ms]
+  √  Status 200
+  √  Perfil ROLE_CIDADAO
+
+└ CT04 - Login com senha incorreta
+  POST https://localhost:7275/api/auth/login [401 Unauthorized, 200B, 117ms]
+  √  Status 401
+  √  Mensagem genérica
+
+└ CT05 - Login com e-mail inexistente
+  POST https://localhost:7275/api/auth/login [401 Unauthorized, 200B, 12ms]
+  √  Status 401
+  √  Mensagem genérica
+
+└ CT06 - Tentativa de SQL Injection no login
+  POST https://localhost:7275/api/auth/login [401 Unauthorized, 200B, 11ms]
+  √  SQLi não autentica (401)
+
+└ CT07 - Login com corpo inválido (email nulo)
+  POST https://localhost:7275/api/auth/login [400 Bad Request, 450B, 15ms]
+  √  Status 400
+
+□ 02 - Regiões
+└ CT08 - Listar regiões
+  GET https://localhost:7275/api/regioes [200 OK, 1.7kB, 42ms]
+  √  Status 200
+  √  Retorna array com regiões
+
+└ CT09 - Obter região por id
+  GET https://localhost:7275/api/regioes/bea18d4e-5c6d-40f0-8ff0-e6da0e8cf625 [200 OK, 371B, 20ms]
+  √  Status 200
+  √  Id confere
+
+└ CT10 - Obter região inexistente
+  GET https://localhost:7275/api/regioes/00000000-0000-0000-0000-000000000001 [404 Not Found, 325B, 12ms]
+  √  Status 404
+
+└ CT11 - Criar região sem token
+  POST https://localhost:7275/api/regioes [401 Unauthorized, 128B, 7ms]
+  √  Status 401
+
+└ CT12 - Criar região como cidadão
+  POST https://localhost:7275/api/regioes [403 Forbidden, 99B, 33ms]
+  √  Status 403
+
+└ CT13 - Criar região com dados inválidos
+  POST https://localhost:7275/api/regioes [400 Bad Request, 473B, 10ms]
+  √  Status 400
+  √  Aponta erro em Nome e Estado
+
+└ CT14 - Criar região (admin)
+  POST https://localhost:7275/api/regioes [201 Created, 444B, 189ms]
+  √  Status 201
+  √  Header Location presente
+  √  UF normalizada para maiúsculas
+  √  Nível inicial NORMAL
+  √  Data de criação preenchida
+
+└ CT15 - Atualizar região (admin)
+  PUT https://localhost:7275/api/regioes/162136af-6e9d-4c1d-82d6-17ce648c59c2 [200 OK, 386B, 54ms]
+  √  Status 200
+  √  Cidade atualizada
+  √  Campo ativo refletido na resposta
+
+└ CT16 - Atualizar região inexistente
+  PUT https://localhost:7275/api/regioes/00000000-0000-0000-0000-000000000001 [404 Not Found, 325B, 8ms]
+  √  Status 404
+
+□ 03 - Sensores
+└ CT17 - Listar sensores
+  GET https://localhost:7275/api/sensores [200 OK, 3.26kB, 34ms]
+  √  Status 200
+  √  Tipos serializados como texto
+
+└ CT18 - Obter sensor por id
+  GET https://localhost:7275/api/sensores/e39ad137-24d6-4153-bc03-92ab5ad529de [200 OK, 491B, 22ms]
+  √  Status 200
+  √  Código PLUV-001
+
+└ CT19 - Obter sensor inexistente
+  GET https://localhost:7275/api/sensores/00000000-0000-0000-0000-000000000001 [404 Not Found, 325B, 8ms]
+  √  Status 404
+
+└ CT20 - Criar sensor como cidadão
+  POST https://localhost:7275/api/sensores [403 Forbidden, 99B, 4ms]
+  √  Status 403
+
+└ CT21 - Criar sensor com limites fora de ordem
+  POST https://localhost:7275/api/sensores [400 Bad Request, 232B, 27ms]
+  √  Status 400
+  √  Mensagem explica a ordem dos limites
+
+└ CT22 - Criar sensor (admin)
+  POST https://localhost:7275/api/sensores [201 Created, 563B, 132ms]
+  √  Status 201
+  √  Sensor ativo por padrão
+
+└ CT23 - Criar sensor com código duplicado
+  POST https://localhost:7275/api/sensores [409 Conflict, 223B, 19ms]
+  √  Status 409
+
+└ CT24 - Atualizar sensor sem token
+  PUT https://localhost:7275/api/sensores/ce894934-2a41-48ea-9920-aaca7ab3c903 [401 Unauthorized, 128B, 5ms]
+  √  Status 401
+
+└ CT25 - Atualizar sensor (admin)
+  PUT https://localhost:7275/api/sensores/ce894934-2a41-48ea-9920-aaca7ab3c903 [200 OK, 505B, 58ms]
+  √  Status 200
+  √  Limite de perigo atualizado
+
+□ 04 - Medições e geração de alertas
+└ CT26 - Enviar medição sem API Key
+  POST https://localhost:7275/api/medicoes [401 Unauthorized, 188B, 8ms]
+  √  Status 401
+
+└ CT27 - Enviar medição com API Key inválida
+  POST https://localhost:7275/api/medicoes [401 Unauthorized, 188B, 3ms]
+  √  Status 401
+
+└ CT28 - Enviar medição com valor negativo
+  POST https://localhost:7275/api/medicoes [400 Bad Request, 216B, 6ms]
+  √  Status 400
+  √  Mensagem de validação
+
+└ CT29 - Enviar medição para sensor inexistente
+  POST https://localhost:7275/api/medicoes [400 Bad Request, 220B, 11ms]
+  √  Status 400
+  √  Mensagem de sensor inexistente
+
+└ CT30 - Medição NORMAL (5 mm)
+  POST https://localhost:7275/api/medicoes [201 Created, 199B, 115ms]
+  √  Status 201
+
+└ CT31 - Região permanece NORMAL
+  GET https://localhost:7275/api/regioes/162136af-6e9d-4c1d-82d6-17ce648c59c2 [200 OK, 379B, 7ms]
+  √  Status 200
+  √  nivelRiscoAtual = NORMAL
+
+└ CT32 - Medição de PERIGO (72,5 mm)
+  POST https://localhost:7275/api/medicoes [201 Created, 199B, 59ms]
+  √  Status 201
+
+└ CT33 - Região elevada para PERIGO
+  GET https://localhost:7275/api/regioes/162136af-6e9d-4c1d-82d6-17ce648c59c2 [200 OK, 379B, 13ms]
+  √  Status 200
+  √  nivelRiscoAtual = PERIGO
+
+└ CT34 - Alerta PERIGO criado automaticamente
+  GET https://localhost:7275/api/alertas [200 OK, 7.55kB, 58ms]
+  √  Status 200
+  √  Existe alerta ativo para o sensor
+  √  Nível PERIGO / status ATIVO
+
+└ CT35 - Listar medições
+  GET https://localhost:7275/api/medicoes [200 OK, 18.54kB, 25ms]
+  √  Status 200
+  √  Medição de teste registrada
+
+└ CT36 - Obter medição por id
+  GET https://localhost:7275/api/medicoes/b3b3e269-42b8-47e0-9aa5-d472ab57437a [200 OK, 357B, 17ms]
+  √  Status 200
+  √  Unidade mm
+
+└ CT37 - Obter medição inexistente
+  GET https://localhost:7275/api/medicoes/00000000-0000-0000-0000-000000000001 [404 Not Found, 325B, 6ms]
+  √  Status 404
+
+└ CT38 - Medição volta ao normal (4 mm)
+  POST https://localhost:7275/api/medicoes [201 Created, 199B, 35ms]
+  √  Status 201
+
+└ CT39 - Alerta resolvido automaticamente
+  GET https://localhost:7275/api/alertas/88cc153c-f4bd-472c-abc7-54c402112b10 [200 OK, 606B, 25ms]
+  √  Status 200
+  √  Status RESOLVIDO_AUTO
+  √  Inativo com data de resolução
+
+└ CT40 - Região volta para NORMAL
+  GET https://localhost:7275/api/regioes/162136af-6e9d-4c1d-82d6-17ce648c59c2 [200 OK, 380B, 11ms]
+  √  Status 200
+  √  nivelRiscoAtual = NORMAL
+
+□ 05 - Alertas
+└ CT41 - Listar alertas
+  GET https://localhost:7275/api/alertas [200 OK, 7.59kB, 34ms]
+  √  Status 200
+  √  Retorna array
+
+└ CT42 - Obter alerta inexistente
+  GET https://localhost:7275/api/alertas/00000000-0000-0000-0000-000000000001 [404 Not Found, 325B, 6ms]
+  √  Status 404
+
+└ CT43 - Excluir alerta sem token
+  DELETE https://localhost:7275/api/alertas/88cc153c-f4bd-472c-abc7-54c402112b10 [401 Unauthorized, 128B, 2ms]
+  √  Status 401
+
+└ CT44 - Excluir alerta como cidadão
+  DELETE https://localhost:7275/api/alertas/88cc153c-f4bd-472c-abc7-54c402112b10 [403 Forbidden, 99B, 2ms]
+  √  Status 403
+
+└ CT45 - Excluir alerta com token adulterado
+  DELETE https://localhost:7275/api/alertas/88cc153c-f4bd-472c-abc7-54c402112b10 [401 Unauthorized, 203B, 4ms]
+  √  Status 401
+
+└ CT46 - Excluir alerta (admin)
+  DELETE https://localhost:7275/api/alertas/88cc153c-f4bd-472c-abc7-54c402112b10 [204 No Content, 81B, 40ms]
+  √  Status 204
+
+└ CT47 - Excluir alerta já excluído
+  DELETE https://localhost:7275/api/alertas/88cc153c-f4bd-472c-abc7-54c402112b10 [404 Not Found, 325B, 8ms]
+  √  Status 404
+
+□ 06 - Limpeza
+└ CT48 - Desativar sensor de teste
+  PUT https://localhost:7275/api/sensores/ce894934-2a41-48ea-9920-aaca7ab3c903 [200 OK, 529B, 36ms]
+  √  Status 200
+  √  Sensor inativo
+
+└ CT49 - Desativar região de teste
+  PUT https://localhost:7275/api/regioes/162136af-6e9d-4c1d-82d6-17ce648c59c2 [200 OK, 388B, 20ms]
+  √  Status 200
+
+┌─────────────────────────┬────────────────────┬───────────────────┐
+│                         │           executed │            failed │
+├─────────────────────────┼────────────────────┼───────────────────┤
+│              iterations │                  1 │                 0 │
+├─────────────────────────┼────────────────────┼───────────────────┤
+│                requests │                 49 │                 0 │
+├─────────────────────────┼────────────────────┼───────────────────┤
+│            test-scripts │                 49 │                 0 │
+├─────────────────────────┼────────────────────┼───────────────────┤
+│      prerequest-scripts │                  2 │                 0 │
+├─────────────────────────┼────────────────────┼───────────────────┤
+│              assertions │                 83 │                 0 │
+├─────────────────────────┴────────────────────┴───────────────────┤
+│ total run duration: 6.2s                                         │
+├──────────────────────────────────────────────────────────────────┤
+│ total data received: 45.32kB (approx)                            │
+├──────────────────────────────────────────────────────────────────┤
+│ average response time: 57ms [min: 2ms, max: 1307ms, s.d.: 184ms] │
+└──────────────────────────────────────────────────────────────────┘

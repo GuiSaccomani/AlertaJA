@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="AlertaJá API - Global Solution 2026/2" tests="49" time="2.834">
+  <testsuite name="00 - Status / CT01 - Status da API" id="e4c6694f-52aa-44de-b60d-953dd3e66055" timestamp="2026-11-19T12:28:51.571Z" tests="2" failures="0" errors="0" time="0.034">
+    <testcase name="Status 200" time="0.034" classname="00StatusCt01StatusDaApi"/>
+    <testcase name="Sistema online" time="0.034" classname="00StatusCt01StatusDaApi"/>
+  </testsuite>
+  <testsuite name="01 - Autenticação / CT02 - Login administrador (válido)" id="7921fafa-5b10-4a00-a3b9-d856470eb53d" timestamp="2026-11-19T12:28:51.571Z" tests="4" failures="0" errors="0" time="1.307">
+    <testcase name="Status 200" time="1.307" classname="01AutenticacaoCt02LoginAdministradorValido"/>
+    <testcase name="Retorna token JWT" time="1.307" classname="01AutenticacaoCt02LoginAdministradorValido"/>
+    <testcase name="Perfil ROLE_ADMIN" time="1.307" classname="01AutenticacaoCt02LoginAdministradorValido"/>
+    <testcase name="Resposta não expõe a senha" time="1.307" classname="01AutenticacaoCt02LoginAdministradorValido"/>
+  </testsuite>
+  <testsuite name="01 - Autenticação / CT03 - Login cidadão (válido)" id="42499fa7-7b6a-40a1-bbcf-af750cadb3cf" timestamp="2026-11-19T12:28:51.571Z" tests="2" failures="0" errors="0" time="0.103">
+    <testcase name="Status 200" time="0.103" classname="01AutenticacaoCt03LoginCidadaoValido"/>
+    <testcase name="Perfil ROLE_CIDADAO" time="0.103" classname="01AutenticacaoCt03LoginCidadaoValido"/>
+  </testsuite>
+  <testsuite name="01 - Autenticação / CT04 - Login com senha incorreta" id="80c8ca93-c958-4e90-a933-302753fc572c" timestamp="2026-11-19T12:28:51.571Z" tests="2" failures="0" errors="0" time="0.117">
+    <testcase name="Status 401" time="0.117" classname="01AutenticacaoCt04LoginComSenhaIncorreta"/>
+    <testcase name="Mensagem genérica" time="0.117" classname="01AutenticacaoCt04LoginComSenhaIncorreta"/>
+  </testsuite>
+  <testsuite name="01 - Autenticação / CT05 - Login com e-mail inexistente" id="741a38f2-0ac5-4e61-ae5d-1946b6e9cba2" timestamp="2026-11-19T12:28:51.571Z" tests="2" failures="0" errors="0" time="0.012">
+    <testcase name="Status 401" time="0.012" classname="01AutenticacaoCt05LoginComEMailInexistente"/>
+    <testcase name="Mensagem genérica" time="0.012" classname="01AutenticacaoCt05LoginComEMailInexistente"/>
+  </testsuite>
+  <testsuite name="01 - Autenticação / CT06 - Tentativa de SQL Injection no login" id="f90564a3-7362-42fd-9435-48e346e466c4" timestamp="2026-11-19T12:28:51.571Z" tests="1" failures="0" errors="0" time="0.011">
+    <testcase name="SQLi não autentica (401)" time="0.011" classname="01AutenticacaoCt06TentativaDeSqlInjectionNoLogin"/>
+  </testsuite>
+  <testsuite name="01 - Autenticação / CT07 - Login com corpo inválido (email nulo)" id="adb46fc9-08b3-4a85-86ed-0125aa2ef00b" timestamp="2026-11-19T12:28:51.571Z" tests="1" failures="0" errors="0" time="0.015">
+    <testcase name="Status 400" time="0.015" classname="01AutenticacaoCt07LoginComCorpoInvalidoEmailNulo"/>
+  </testsuite>
+  <testsuite name="02 - Regiões / CT08 - Listar regiões" id="3120ace8-8e56-4c91-a709-c2dcfe157fbd" timestamp="2026-11-19T12:28:51.571Z" tests="2" failures="0" errors="0" time="0.042">
+    <testcase name="Status 200" time="0.042" classname="02RegioesCt08ListarRegioes"/>
+    <testcase name="Retorna array com regiões" time="0.042" classname="02RegioesCt08ListarRegioes"/>
+  </testsuite>
+  <testsuite name="02 - Regiões / CT09 - Obter região por id" id="c1d291c7-bc7f-4a57-909c-188763297d56" timestamp="2026-11-19T12:28:51.571Z" tests="2" failures="0" errors="0" time="0.020">
+    <testcase name="Status 200" time="0.020" classname="02RegioesCt09ObterRegiaoPorId"/>
+    <testcase name="Id confere" time="0.020" classname="02RegioesCt09ObterRegiaoPorId"/>
+  </testsuite>
+  <testsuite name="02 - Regiões / CT10 - Obter região inexistente" id="017ce860-e479-4d80-9f70-785e37590fe7" timestamp="2026-11-19T12:28:51.571Z" tests="1" failures="0" errors="0" time="0.012">
+    <testcase name="Status 404" time="0.012" classname="02RegioesCt10ObterRegiaoInexistente"/>
+  </testsuite>
+  <testsuite name="02 - Regiões / CT11 - Criar região sem token" id="998d0d26-a3ce-47f4-a928-6d5faafd7146" timestamp="2026-11-19T12:28:51.571Z" tests="1" failures="0" errors="0" time="0.007">
+    <testcase name="Status 401" time="0.007" classname="02RegioesCt11CriarRegiaoSemToken"/>
+  </testsuite>
+  <testsuite name="02 - Regiões / CT12 - Criar região como cidadão" id="c93710d7-2b17-47c2-8cc4-1ea99d9530f2" timestamp="2026-11-19T12:28:51.571Z" tests="1" failures="0" errors="0" time="0.033">
+    <testcase name="Status 403" time="0.033" classname="02RegioesCt12CriarRegiaoComoCidadao"/>
+  </testsuite>
+  <testsuite name="02 - Regiões / CT13 - Criar região com dados inválidos" id="30ac59f8-1684-4b4c-8574-ae25ac71f3b5" timestamp="2026-11-19T12:28:51.571Z" tests="2" failures="0" errors="0" time="0.010">
+    <testcase name="Status 400" time="0.010" classname="02RegioesCt13CriarRegiaoComDadosInvalidos"/>
+    <testcase name="Aponta erro em Nome e Estado" time="0.010" classname="02RegioesCt13CriarRegiaoComDadosInvalidos"/>
+  </testsuite>
+  <testsuite name="02 - Regiões / CT14 - Criar região (admin)" id="08b5900d-fc14-4ede-9a9f-9bdde6b6ae2a" timestamp="2026-11-19T12:28:51.571Z" tests="5" failures="0" errors="0" time="0.189">
+    <testcase name="Status 201" time="0.189" classname="02RegioesCt14CriarRegiaoAdmin"/>
+    <testcase name="Header Location presente" time="0.189" classname="02RegioesCt14CriarRegiaoAdmin"/>
+    <testcase name="UF normalizada para maiúsculas" time="0.189" classname="02RegioesCt14CriarRegiaoAdmin"/>
+    <testcase name="Nível inicial NORMAL" time="0.189" classname="02RegioesCt14CriarRegiaoAdmin"/>
+    <testcase name="Data de criação preenchida" time="0.189" classname="02RegioesCt14CriarRegiaoAdmin"/>
+  </testsuite>
+  <testsuite name="02 - Regiões / CT15 - Atualizar região (admin)" id="0820f3f0-4b34-4e17-9e33-5a556865cf33" timestamp="2026-11-19T12:28:51.571Z" tests="3" failures="0" errors="0" time="0.054">
+    <testcase name="Status 200" time="0.054" classname="02RegioesCt15AtualizarRegiaoAdmin"/>
+    <testcase name="Cidade atualizada" time="0.054" classname="02RegioesCt15AtualizarRegiaoAdmin"/>
+    <testcase name="Campo ativo refletido na resposta" time="0.054" classname="02RegioesCt15AtualizarRegiaoAdmin"/>
+  </testsuite>
+  <testsuite name="02 - Regiões / CT16 - Atualizar região inexistente" id="f4f28f38-2716-42c3-bf09-e063f1fdb893" timestamp="2026-11-19T12:28:51.571Z" tests="1" failures="0" errors="0" time="0.008">
+    <testcase name="Status 404" time="0.008" classname="02RegioesCt16AtualizarRegiaoInexistente"/>
+  </testsuite>
+  <testsuite name="03 - Sensores / CT17 - Listar sensores" id="a5e740cc-1c3a-4188-b910-ddd0d68d76ed" timestamp="2026-11-19T12:28:51.571Z" tests="2" failures="0" errors="0" time="0.034">
+    <testcase name="Status 200" time="0.034" classname="03SensoresCt17ListarSensores"/>
+    <testcase name="Tipos serializados como texto" time="0.034" classname="03SensoresCt17ListarSensores"/>
+  </testsuite>
+  <testsuite name="03 - Sensores / CT18 - Obter sensor por id" id="0bc10dfc-2603-4eef-9b82-51e683df786e" timestamp="2026-11-19T12:28:51.571Z" tests="2" failures="0" errors="0" time="0.022">
+    <testcase name="Status 200" time="0.022" classname="03SensoresCt18ObterSensorPorId"/>
+    <testcase name="Código PLUV-001" time="0.022" classname="03SensoresCt18ObterSensorPorId"/>
+  </testsuite>
+  <testsuite name="03 - Sensores / CT19 - Obter sensor inexistente" id="7b7e664a-6c43-4077-bb07-f8f2a9e4b2b1" timestamp="2026-11-19T12:28:51.571Z" tests="1" failures="0" errors="0" time="0.008">
+    <testcase name="Status 404" time="0.008" classname="03SensoresCt19ObterSensorInexistente"/>
+  </testsuite>
+  <testsuite name="03 - Sensores / CT20 - Criar sensor como cidadão" id="d47b3009-5c3d-46a4-a3af-bf9a043dbbfa" timestamp="2026-11-19T12:28:51.571Z" tests="1" failures="0" errors="0" time="0.004">
+    <testcase name="Status 403" time="0.004" classname="03SensoresCt20CriarSensorComoCidadao"/>
+  </testsuite>
+  <testsuite name="03 - Sensores / CT21 - Criar sensor com limites fora de ordem" id="d5678c6c-eb65-460e-ac99-5d18a0b7e565" timestamp="2026-11-19T12:28:51.571Z" tests="2" failures="0" errors="0" time="0.027">
+    <testcase name="Status 400" time="0.027" classname="03SensoresCt21CriarSensorComLimitesForaDeOrdem"/>
+    <testcase name="Mensagem explica a ordem dos limites" time="0.027" classname="03SensoresCt21CriarSensorComLimitesForaDeOrdem"/>
+  </testsuite>
+  <testsuite name="03 - Sensores / CT22 - Criar sensor (admin)" id="e04d2405-7a8d-42a5-9b51-82c6593d85d3" timestamp="2026-11-19T12:28:51.571Z" tests="2" failures="0" errors="0" time="0.132">
+    <testcase name="Status 201" time="0.132" classname="03SensoresCt22CriarSensorAdmin"/>
+    <testcase name="Sensor ativo por padrão" time="0.132" classname="03SensoresCt22CriarSensorAdmin"/>
+  </testsuite>
+  <testsuite name="03 - Sensores / CT23 - Criar sensor com código duplicado" id="75108475-e8f0-4f31-8559-cc1d6cb5bb00" timestamp="2026-11-19T12:28:51.571Z" tests="1" failures="0" errors="0" time="0.019">
+    <testcase name="Status 409" time="0.019" classname="03SensoresCt23CriarSensorComCodigoDuplicado"/>
+  </testsuite>
+  <testsuite name="03 - Sensores / CT24 - Atualizar sensor sem token" id="d33ff291-8384-44c4-8466-b57369462ad9" timestamp="2026-11-19T12:28:51.571Z" tests="1" failures="0" errors="0" time="0.005">
+    <testcase name="Status 401" time="0.005" classname="03SensoresCt24AtualizarSensorSemToken"/>
+  </testsuite>
+  <testsuite name="03 - Sensores / CT25 - Atualizar sensor (admin)" id="a3baa325-135b-48c3-bfb5-1f74f628aa4f" timestamp="2026-11-19T12:28:51.571Z" tests="2" failures="0" errors="0" time="0.058">
+    <testcase name="Status 200" time="0.058" classname="03SensoresCt25AtualizarSensorAdmin"/>
+    <testcase name="Limite de perigo atualizado" time="0.058" classname="03SensoresCt25AtualizarSensorAdmin"/>
+  </testsuite>
+  <testsuite name="04 - Medições e geração de alertas / CT26 - Enviar medição sem API Key" id="4509559c-1341-4da0-8c6b-7367c132ccfa" timestamp="2026-11-19T12:28:51.571Z" tests="1" failures="0" errors="0" time="0.008">
+    <testcase name="Status 401" time="0.008" classname="04MedicoesEGeracaoDeAlertasCt26EnviarMedicaoSemApiKey"/>
+  </testsuite>
+  <testsuite name="04 - Medições e geração de alertas / CT27 - Enviar medição com API Key inválida" id="8b8e504e-eb0f-4e01-a157-cc8308a92796" timestamp="2026-11-19T12:28:51.571Z" tests="1" failures="0" errors="0" time="0.003">
+    <testcase name="Status 401" time="0.003" classname="04MedicoesEGeracaoDeAlertasCt27EnviarMedicaoComApiKeyInvalida"/>
+  </testsuite>
+  <testsuite name="04 - Medições e geração de alertas / CT28 - Enviar medição com valor negativo" id="079607b8-336f-483e-9634-638dde4c872a" timestamp="2026-11-19T12:28:51.571Z" tests="2" failures="0" errors="0" time="0.006">
+    <testcase name="Status 400" time="0.006" classname="04MedicoesEGeracaoDeAlertasCt28EnviarMedicaoComValorNegativo"/>
+    <testcase name="Mensagem de validação" time="0.006" classname="04MedicoesEGeracaoDeAlertasCt28EnviarMedicaoComValorNegativo"/>
+  </testsuite>
+  <testsuite name="04 - Medições e geração de alertas / CT29 - Enviar medição para sensor inexistente" id="bc8c3171-0559-4b02-815e-aa59deb14b71" timestamp="2026-11-19T12:28:51.571Z" tests="2" failures="0" errors="0" time="0.011">
+    <testcase name="Status 400" time="0.011" classname="04MedicoesEGeracaoDeAlertasCt29EnviarMedicaoParaSensorInexistente"/>
+    <testcase name="Mensagem de sensor inexistente" time="0.011" classname="04MedicoesEGeracaoDeAlertasCt29EnviarMedicaoParaSensorInexistente"/>
+  </testsuite>
+  <testsuite name="04 - Medições e geração de alertas / CT30 - Medição NORMAL (5 mm)" id="d0c7860a-3f21-4d13-ba95-66d546fce5a1" timestamp="2026-11-19T12:28:51.571Z" tests="1" failures="0" errors="0" time="0.115">
+    <testcase name="Status 201" time="0.115" classname="04MedicoesEGeracaoDeAlertasCt30MedicaoNormal5Mm"/>
+  </testsuite>
+  <testsuite name="04 - Medições e geração de alertas / CT31 - Região permanece NORMAL" id="c140f529-45bc-472a-80fc-3674fe6b29fd" timestamp="2026-11-19T12:28:51.571Z" tests="2" failures="0" errors="0" time="0.007">
+    <testcase name="Status 200" time="0.007" classname="04MedicoesEGeracaoDeAlertasCt31RegiaoPermaneceNormal"/>
+    <testcase name="nivelRiscoAtual = NORMAL" time="0.007" classname="04MedicoesEGeracaoDeAlertasCt31RegiaoPermaneceNormal"/>
+  </testsuite>
+  <testsuite name="04 - Medições e geração de alertas / CT32 - Medição de PERIGO (72,5 mm)" id="455402f3-ff74-44ef-a7c9-945234ca6447" timestamp="2026-11-19T12:28:51.571Z" tests="1" failures="0" errors="0" time="0.059">
+    <testcase name="Status 201" time="0.059" classname="04MedicoesEGeracaoDeAlertasCt32MedicaoDePerigo725Mm"/>
+  </testsuite>
+  <testsuite name="04 - Medições e geração de alertas / CT33 - Região elevada para PERIGO" id="0ed2bd64-f9a1-48dd-9205-9fb2a7d20397" timestamp="2026-11-19T12:28:51.571Z" tests="2" failures="0" errors="0" time="0.013">
+    <testcase name="Status 200" time="0.013" classname="04MedicoesEGeracaoDeAlertasCt33RegiaoElevadaParaPerigo"/>
+    <testcase name="nivelRiscoAtual = PERIGO" time="0.013" classname="04MedicoesEGeracaoDeAlertasCt33RegiaoElevadaParaPerigo"/>
+  </testsuite>
+  <testsuite name="04 - Medições e geração de alertas / CT34 - Alerta PERIGO criado automaticamente" id="8ccedad0-aa27-4995-b4bd-cccc56115b3a" timestamp="2026-11-19T12:28:51.571Z" tests="3" failures="0" errors="0" time="0.058">
+    <testcase name="Status 200" time="0.058" classname="04MedicoesEGeracaoDeAlertasCt34AlertaPerigoCriadoAutomaticamente"/>
+    <testcase name="Existe alerta ativo para o sensor" time="0.058" classname="04MedicoesEGeracaoDeAlertasCt34AlertaPerigoCriadoAutomaticamente"/>
+    <testcase name="Nível PERIGO / status ATIVO" time="0.058" classname="04MedicoesEGeracaoDeAlertasCt34AlertaPerigoCriadoAutomaticamente"/>
+  </testsuite>
+  <testsuite name="04 - Medições e geração de alertas / CT35 - Listar medições" id="233cb70d-6451-4c2b-afe5-7e8b67c12587" timestamp="2026-11-19T12:28:51.571Z" tests="2" failures="0" errors="0" time="0.025">
+    <testcase name="Status 200" time="0.025" classname="04MedicoesEGeracaoDeAlertasCt35ListarMedicoes"/>
+    <testcase name="Medição de teste registrada" time="0.025" classname="04MedicoesEGeracaoDeAlertasCt35ListarMedicoes"/>
+  </testsuite>
+  <testsuite name="04 - Medições e geração de alertas / CT36 - Obter medição por id" id="648fb8ef-80b7-4e07-b859-a6cd86625298" timestamp="2026-11-19T12:28:51.571Z" tests="2" failures="0" errors="0" time="0.017">
+    <testcase name="Status 200" time="0.017" classname="04MedicoesEGeracaoDeAlertasCt36ObterMedicaoPorId"/>
+    <testcase name="Unidade mm" time="0.017" classname="04MedicoesEGeracaoDeAlertasCt36ObterMedicaoPorId"/>
+  </testsuite>
+  <testsuite name="04 - Medições e geração de alertas / CT37 - Obter medição inexistente" id="07395f34-f878-4f5e-bf8b-619527ba7ba5" timestamp="2026-11-19T12:28:51.571Z" tests="1" failures="0" errors="0" time="0.006">
+    <testcase name="Status 404" time="0.006" classname="04MedicoesEGeracaoDeAlertasCt37ObterMedicaoInexistente"/>
+  </testsuite>
+  <testsuite name="04 - Medições e geração de alertas / CT38 - Medição volta ao normal (4 mm)" id="b31d74a6-ef46-4e6b-90eb-7ae86457da59" timestamp="2026-11-19T12:28:51.571Z" tests="1" failures="0" errors="0" time="0.035">
+    <testcase name="Status 201" time="0.035" classname="04MedicoesEGeracaoDeAlertasCt38MedicaoVoltaAoNormal4Mm"/>
+  </testsuite>
+  <testsuite name="04 - Medições e geração de alertas / CT39 - Alerta resolvido automaticamente" id="234a5bce-134b-468d-80c5-7417ba736e24" timestamp="2026-11-19T12:28:51.571Z" tests="3" failures="0" errors="0" time="0.025">
+    <testcase name="Status 200" time="0.025" classname="04MedicoesEGeracaoDeAlertasCt39AlertaResolvidoAutomaticamente"/>
+    <testcase name="Status RESOLVIDO_AUTO" time="0.025" classname="04MedicoesEGeracaoDeAlertasCt39AlertaResolvidoAutomaticamente"/>
+    <testcase name="Inativo com data de resolução" time="0.025" classname="04MedicoesEGeracaoDeAlertasCt39AlertaResolvidoAutomaticamente"/>
+  </testsuite>
+  <testsuite name="04 - Medições e geração de alertas / CT40 - Região volta para NORMAL" id="523867af-57d9-4c87-a3b6-519931609297" timestamp="2026-11-19T12:28:51.571Z" tests="2" failures="0" errors="0" time="0.011">
+    <testcase name="Status 200" time="0.011" classname="04MedicoesEGeracaoDeAlertasCt40RegiaoVoltaParaNormal"/>
+    <testcase name="nivelRiscoAtual = NORMAL" time="0.011" classname="04MedicoesEGeracaoDeAlertasCt40RegiaoVoltaParaNormal"/>
+  </testsuite>
+  <testsuite name="05 - Alertas / CT41 - Listar alertas" id="2ee7e331-f45c-4d21-968d-0877dabc7e8f" timestamp="2026-11-19T12:28:51.571Z" tests="2" failures="0" errors="0" time="0.034">
+    <testcase name="Status 200" time="0.034" classname="05AlertasCt41ListarAlertas"/>
+    <testcase name="Retorna array" time="0.034" classname="05AlertasCt41ListarAlertas"/>
+  </testsuite>
+  <testsuite name="05 - Alertas / CT42 - Obter alerta inexistente" id="aa5ea51b-9b09-4321-b476-73a9db162bea" timestamp="2026-11-19T12:28:51.571Z" tests="1" failures="0" errors="0" time="0.006">
+    <testcase name="Status 404" time="0.006" classname="05AlertasCt42ObterAlertaInexistente"/>
+  </testsuite>
+  <testsuite name="05 - Alertas / CT43 - Excluir alerta sem token" id="08469623-f704-4560-a47c-1d451c209994" timestamp="2026-11-19T12:28:51.571Z" tests="1" failures="0" errors="0" time="0.002">
+    <testcase name="Status 401" time="0.002" classname="05AlertasCt43ExcluirAlertaSemToken"/>
+  </testsuite>
+  <testsuite name="05 - Alertas / CT44 - Excluir alerta como cidadão" id="e18e56ce-da43-472a-9e6b-bee475687fe5" timestamp="2026-11-19T12:28:51.571Z" tests="1" failures="0" errors="0" time="0.002">
+    <testcase name="Status 403" time="0.002" classname="05AlertasCt44ExcluirAlertaComoCidadao"/>
+  </testsuite>
+  <testsuite name="05 - Alertas / CT45 - Excluir alerta com token adulterado" id="44f61f5e-28fd-4e79-b3c1-1a2be0e1eedd" timestamp="2026-11-19T12:28:51.571Z" tests="1" failures="0" errors="0" time="0.004">
+    <testcase name="Status 401" time="0.004" classname="05AlertasCt45ExcluirAlertaComTokenAdulterado"/>
+  </testsuite>
+  <testsuite name="05 - Alertas / CT46 - Excluir alerta (admin)" id="cd2f2932-4274-41e4-a04c-4b056a8445cb" timestamp="2026-11-19T12:28:51.571Z" tests="1" failures="0" errors="0" time="0.040">
+    <testcase name="Status 204" time="0.040" classname="05AlertasCt46ExcluirAlertaAdmin"/>
+  </testsuite>
+  <testsuite name="05 - Alertas / CT47 - Excluir alerta já excluído" id="b5460d9c-2b7a-4cc0-afcc-b66fb10b8dc4" timestamp="2026-11-19T12:28:51.571Z" tests="1" failures="0" errors="0" time="0.008">
+    <testcase name="Status 404" time="0.008" classname="05AlertasCt47ExcluirAlertaJaExcluido"/>
+  </testsuite>
+  <testsuite name="06 - Limpeza / CT48 - Desativar sensor de teste" id="1f7d0efa-f8b1-4c8f-8263-3ad1522ff3c8" timestamp="2026-11-19T12:28:51.571Z" tests="2" failures="0" errors="0" time="0.036">
+    <testcase name="Status 200" time="0.036" classname="06LimpezaCt48DesativarSensorDeTeste"/>
+    <testcase name="Sensor inativo" time="0.036" classname="06LimpezaCt48DesativarSensorDeTeste"/>
+  </testsuite>
+  <testsuite name="06 - Limpeza / CT49 - Desativar região de teste" id="aab4ab4f-ea8b-463b-b3eb-6f097138ab23" timestamp="2026-11-19T12:28:51.571Z" tests="1" failures="0" errors="0" time="0.020">
+    <testcase name="Status 200" time="0.020" classname="06LimpezaCt49DesativarRegiaoDeTeste"/>
+  </testsuite>
+</testsuites>

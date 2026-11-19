@@ -1,126 +1,63 @@
-# AlertaJá - Arquitetura de Software e Engenharia do Sistema
+# Arquitetura do AlertaJá
 
-O **AlertaJá** é uma plataforma distribuída desenvolvida para monitoramento contínuo de riscos hidrológicos e alagamentos urbanos, integrando telemetria em tempo real de sensores pluviométricos e fluviométricos, motor de regras de alerta automatizado e interface de comando e controle para cidadãos e equipes de resposta civil.
+![Arquitetura](arquitetura.png)
 
----
+## Componentes
 
-## 1. Diagrama de Arquitetura do Sistema
+| Componente | Tecnologia | Responsabilidade |
+| :--- | :--- | :--- |
+| Simulador IoT | Python 3 (`requests`, `python-dotenv`) | Representa pluviômetros e sensores de nível enviando leituras por HTTPS com `X-API-Key`. |
+| API REST | C# · ASP.NET Core 10 · EF Core | Autenticação, autorização, CRUD, ingestão de medições e motor de alertas. |
+| Banco de dados | Oracle 19c | Persistência de usuários, regiões, sensores, medições e alertas. |
+| App mobile | React 18 + Vite | Interface do cidadão e do administrador; consome a API por proxy do Vite. |
+| Testes | Postman Collection + Newman | 49 casos de teste de API executados por comando. |
 
-```mermaid
-flowchart TB
-    subgraph IoT_Edge["Borda & Simulação IoT (Python)"]
-        PluvSensor["Sensor Pluviométrico (PLUV-SUL-01)<br/>Volume de Chuva (mm/h)"]
-        NivelSensor["Sensor Fluviométrico (NIVEL-RIO-01)<br/>Cota do Rio (m)"]
-        SimEngine["Simulador Climático Python<br/>(simulate_sensors.py)"]
-        PluvSensor --> SimEngine
-        NivelSensor --> SimEngine
-    end
+## Camadas da API (`backend/AlertaJa.Api`)
 
-    subgraph Security_Boundary["Barreira de Segurança & Ingestão"]
-        ApiKeyAuth["Filtro X-Sensor-API-Key<br/>ROLE_SENSOR_INGESTION"]
-        JwtAuth["Filtro JWT Bearer<br/>ROLE_ADMIN / ROLE_CIDADAO"]
-    end
-
-    subgraph Backend_App["Backend AlertaJá (Java 21 / Spring Boot 3.4)"]
-        RestController["Controllers REST (/api/v1)"]
-        
-        subgraph Business_Services["Camada de Serviços & Motor de Alertas"]
-            MedicaoService["MedicaoService<br/>(@Transactional Ingestão)"]
-            MotorAlertas["MotorAlertasService<br/>- Anti-duplicação<br/>- Escalonamento<br/>- Auto-resolução"]
-            RegiaoService["RegiaoService<br/>(Recálculo de Risco Regional)"]
-            SensorService["SensorService<br/>(Validação Limiares)"]
-            AuthService["AuthService<br/>(BCrypt / Token JWT)"]
-        end
-        
-        subgraph Persistence_Layer["Spring Data JPA & Repositórios"]
-            RepoMedicao["MedicaoRepository"]
-            RepoAlerta["AlertaRepository"]
-            RepoSensor["SensorRepository"]
-            RepoRegiao["RegiaoRepository"]
-            RepoUsuario["UsuarioRepository"]
-        end
-    end
-
-    subgraph Database["Armazenamento Persistente"]
-        PostgresDB[("PostgreSQL / H2 modo PostgreSQL<br/>- Migrações Flyway V1<br/>- Integridade Referencial")]
-    end
-
-    subgraph Frontend_App["Interface Web de Comando (React / TypeScript)"]
-        DashboardUI["Dashboard com Polling (10s)"]
-        RegioesUI["Gestão de Regiões & Bacias"]
-        AlertasUI["Central de Alertas & Resolução"]
-        AdminUI["Painel Administrativo (RBAC)"]
-    end
-
-    %% Conexões
-    SimEngine -->|"POST /api/v1/medicoes (X-Sensor-API-Key)"| ApiKeyAuth
-    ApiKeyAuth --> RestController
-    
-    Frontend_App -->|"HTTP REST + JWT Bearer"| JwtAuth
-    JwtAuth --> RestController
-
-    RestController --> Business_Services
-    MedicaoService --> MotorAlertas
-    MotorAlertas --> RegiaoService
-    Business_Services --> Persistence_Layer
-    Persistence_Layer --> PostgresDB
+```text
+Program.cs                → carrega o .env, configura EF Core (Oracle), JWT, autorização, HTTPS, OpenAPI
+Controllers/              → entrada HTTP, status codes, [Authorize(Roles = "ROLE_ADMIN")], validação da API Key
+  AuthController            POST /api/auth/login
+  RegioesController         GET/POST/PUT /api/regioes
+  SensoresController        GET/POST/PUT /api/sensores
+  MedicoesController        GET/POST /api/medicoes  (POST exige X-API-Key)
+  AlertasController         GET/DELETE /api/alertas
+  StatusController          GET /api/status
+Services/                 → regras de negócio
+  AuthService               verifica o hash (PasswordHasher) e emite o JWT
+  MedicaoService            valida e registra a medição, atualiza ultima_leitura, aciona o AlertaService
+  AlertaService             classifica, abre/atualiza/resolve alertas, recalcula o risco da região
+  RegiaoService / SensorService   CRUD e validações (limites em ordem, região ativa, código único)
+Data/AppDbContext.cs      → mapeamento EF Core ↔ tabelas Oracle (DbSet = Repository, SaveChanges = Unit of Work)
+Models/ · DTOs/ · Enums/  → entidades, contratos de entrada/saída e TipoSensor
 ```
 
----
-
-## 2. Fluxo de Vida de uma Medição e do Motor de Alertas
+## Fluxo de ingestão (sensor → alerta → app)
 
 ```mermaid
 sequenceDiagram
-    autonumber
-    actor Sensor as Simulador IoT
-    participant API as MedicaoController
-    participant Svc as MedicaoService (@Transactional)
-    participant Motor as MotorAlertasService
-    participant RegiaoSvc as RegiaoService
-    participant DB as PostgreSQL
-
-    Sensor->>API: POST /api/v1/medicoes (X-Sensor-API-Key)
-    API->>Svc: registrarMedicao(request)
-    Svc->>DB: Verifica integridade (Sensor ativo? Região ativa?)
-    Svc->>DB: INSERT INTO medicoes (...)
-    Svc->>DB: UPDATE sensores SET ultima_leitura = NOW()
-    
-    Svc->>Motor: processarAlertaEMedicao(sensor, medicaoSalva)
-    alt Valor >= Limiar de Risco (Atenção, Alerta ou Perigo)
-        alt Sensor já tem Alerta ATIVO no mesmo nível
-            Motor->>DB: UPDATE alertas SET data_ultima_ocorrencia = NOW(), medicao_ultima_id = medicaoId (ANTI-DUPLICAÇÃO)
-        else Sensor estava em nível diferente (Escalonamento)
-            Motor->>DB: UPDATE alertas SET status = 'RESOLVIDO_AUTO', ativo = false (Encerra nível anterior)
-            Motor->>DB: INSERT INTO alertas (nivel = novoNivel, status = 'ATIVO')
-        end
-    else Valor abaixo de Atenção (NORMAL)
-        alt Sensor possui alerta ATIVO
-            Motor->>DB: UPDATE alertas SET status = 'RESOLVIDO_AUTO', ativo = false, data_resolucao = NOW() (AUTO-RESOLUÇÃO)
-        end
-    end
-    
-    Motor->>RegiaoSvc: recalcularRiscoRegiao(regiaoId)
-    RegiaoSvc->>DB: Consulta todos os sensores ativos da região
-    Note over RegiaoSvc: Calcula o maior risco entre os sensores ativos.<br/>A região NÃO normaliza se outro sensor estiver em risco!
-    RegiaoSvc->>DB: UPDATE regioes SET nivel_risco_atual = maiorRisco
-    
-    Svc-->>API: MedicaoResponse (com nível detectado)
-    API-->>Sensor: HTTP 201 CREATED
+    participant S as Simulador IoT
+    participant C as MedicoesController
+    participant M as MedicaoService
+    participant A as AlertaService
+    participant DB as Oracle
+    participant APP as App mobile
+    S->>C: POST /api/medicoes {sensorId, valor} + X-API-Key
+    C->>C: FixedTimeEquals(API Key) - 401 se inválida
+    C->>M: Receber(dto)
+    M->>DB: busca sensor (existe e ativo? senão 400)
+    M->>A: ProcessarMedicao(sensor, medicao)
+    A->>A: classifica NORMAL / ATENCAO / ALERTA / PERIGO
+    A->>A: abre, atualiza ou resolve (RESOLVIDO_AUTO) o alerta do sensor
+    A->>A: risco da região = pior nível entre alertas ativos
+    M->>DB: SaveChangesAsync() - medição + alerta + região em uma transação
+    C-->>S: 201 Created
+    APP->>C: GET /api/regioes e /api/alertas (a cada 10 s)
 ```
 
----
+## Decisões de projeto
 
-## 3. Pilares Arquiteturais
-
-1. **Separação de Papéis e Credenciais (Zero Trust Telemetria):**
-   * Dispositivos de telemetria não utilizam credenciais de usuários (JWT), mas sim a chave de cabeçalho `X-Sensor-API-Key`.
-   * Cidadãos autenticados não possuem autorização de telemetria (`ROLE_SENSOR_INGESTION`), impedindo injeção forjada de dados meteorológicos.
-   * Administradores (`ROLE_ADMIN`) são os únicos com autoridade para cadastrar, editar, desativar regiões/sensores e resolver alertas manualmente.
-
-2. **Consistência Transacional Estrita (`@Transactional`):**
-   * A persistência da medição, o acionamento do motor de alertas e o recálculo do risco regional são executados sob o mesmo contexto transacional. Qualquer erro imprevisto aciona o rollback imediato no banco, impedindo inconsistência no estado dos dados.
-
-3. **Exclusão Lógica e Rastreabilidade (*Soft Delete*):**
-   * Regiões e sensores possuem a flag `ativo = true/false`. Desativações preservam o histórico de medições anteriores para fins periciais e estatísticos.
-   * Cada alerta armazena a `medicao_origem_id` (leitura que abriu a crise) e `medicao_ultima_id` (leitura mais recente em caso de reincidência contínua).
+* **Sem camada Repository genérica:** o EF Core já oferece `DbSet<T>` (repositório) e `SaveChangesAsync()` (unidade de trabalho); um repositório que só repassasse chamadas duplicaria a abstração.
+* **GUIDs como chave primária**, gerados pela aplicação: permitem criar medição e alerta relacionados antes de gravar, numa única transação.
+* **Proxy do Vite** no frontend: evita configurar CORS na API e aceita o certificado HTTPS de desenvolvimento.
+* **API Key separada do JWT:** dispositivos IoT não têm usuário; a chave autentica o envio de leituras sem expor credenciais de pessoas.
