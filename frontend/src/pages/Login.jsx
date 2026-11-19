@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Api } from '../api.js'
 import { useApp } from '../context.jsx'
+import { Logo, Regua } from '../components/ui.jsx'
 
 const DEMOS = [
   { label: 'Administrador', email: 'admin@alertaja.com', senha: 'admin123' },
@@ -30,7 +31,7 @@ export default function Login() {
     try {
       const r = await Api.login(email.trim(), senha)
       login(r)
-      toast(`Bem-vindo(a), ${r.nome.split(' ')[0]}!`)
+      toast(`Você entrou como ${r.nome.split(' ')[0]}.`)
       nav('/painel', { replace: true })
     } catch (err) {
       setError(err.message)
@@ -41,15 +42,13 @@ export default function Login() {
 
   return (
     <div className="login">
-      <div className="login-hero">
-        <div className="login-logo" aria-hidden="true">
-          <svg viewBox="0 0 64 64" width="56" height="56"><path d="M32 6 60 56H4Z" fill="#f97316" /><rect x="28.5" y="22" width="7" height="19" rx="2.5" fill="#0f172a" /><circle cx="32" cy="48" r="4" fill="#0f172a" /></svg>
-        </div>
-        <h1>Alerta<span>Já</span></h1>
-        <p>Alertas de enchente e chuva forte para a sua região, em tempo real.</p>
+      <h1 className="login-logo"><Logo height={64} /></h1>
+      <div className="login-topo">
+        <Regua nivel="ALERTA" height={112} />
+        <p>Saiba antes da água subir. Avisos de chuva forte e cheia de rio para a sua região.</p>
       </div>
 
-      <form className="card form" onSubmit={submit} noValidate>
+      <form className="form" onSubmit={submit} noValidate>
         {loginMsg && <div className="notice notice-warn">{loginMsg}</div>}
         {error && <div className="notice notice-error" role="alert">{error}</div>}
 
@@ -64,18 +63,18 @@ export default function Login() {
           <span>Senha</span>
           <div className="input-group">
             <input type={show ? 'text' : 'password'} autoComplete="current-password" value={senha}
-              onChange={(e) => setSenha(e.target.value)} placeholder="••••••••" aria-invalid={!!fieldErr.senha} />
+              onChange={(e) => setSenha(e.target.value)} aria-invalid={!!fieldErr.senha} />
             <button type="button" className="input-addon" onClick={() => setShow((s) => !s)}>{show ? 'Ocultar' : 'Mostrar'}</button>
           </div>
           {fieldErr.senha && <small className="field-error">{fieldErr.senha}</small>}
         </label>
 
         <button className="btn btn-primary btn-block" disabled={busy}>
-          {busy ? <><span className="spinner spinner-sm" /> Entrando…</> : 'Entrar'}
+          {busy ? <><span className="spinner spinner-sm" /> Entrando</> : 'Entrar'}
         </button>
 
         <div className="demo">
-          <span>Acesso de demonstração</span>
+          <span>Contas de demonstração</span>
           <div className="chips">
             {DEMOS.map((d) => (
               <button type="button" key={d.email} className="chip" onClick={() => { setEmail(d.email); setSenha(d.senha); setError(''); setFieldErr({}) }}>
@@ -85,7 +84,7 @@ export default function Login() {
           </div>
         </div>
       </form>
-      <p className="login-foot">Projeto acadêmico FIAP — dados fictícios. Em emergência ligue 199 (Defesa Civil).</p>
+      <p className="login-foot">Projeto acadêmico com dados simulados. Em emergência real, ligue 199.</p>
     </div>
   )
 }

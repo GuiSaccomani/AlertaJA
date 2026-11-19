@@ -64,7 +64,7 @@ function FormRegiao({ onSaved }) {
   }
 
   return (
-    <form className="card form" onSubmit={submit} noValidate id="form-regiao">
+    <form className="form bloco" onSubmit={submit} noValidate id="form-regiao">
       <h3>Nova região</h3>
       {apiErr && <div className="notice notice-error" role="alert">{apiErr}</div>}
       <Field label="Nome do bairro / região" error={err.nome}>
@@ -140,7 +140,7 @@ function FormSensor({ regioes }) {
   }
 
   return (
-    <form className="card form" onSubmit={submit} noValidate id="form-sensor">
+    <form className="form bloco" onSubmit={submit} noValidate id="form-sensor">
       <h3>Novo sensor</h3>
       {apiErr && <div className="notice notice-error" role="alert">{apiErr}</div>}
       <Field label="Região" error={err.regiaoId}>
@@ -158,8 +158,8 @@ function FormSensor({ regioes }) {
         </Field>
         <Field label="Unidade" error={err.unidadeMedida}>
           <select value={f.unidadeMedida} onChange={set('unidadeMedida')}>
-            <option value="mm">mm (chuva)</option>
-            <option value="cm">cm (nível)</option>
+            <option value="mm">mm</option>
+            <option value="cm">cm</option>
           </select>
         </Field>
       </div>
@@ -177,7 +177,7 @@ function FormSensor({ regioes }) {
           <input inputMode="decimal" type="number" value={f.limitePerigo} onChange={set('limitePerigo')} aria-invalid={!!err.limitePerigo} />
         </Field>
       </div>
-      <small className="muted">Regra: atenção &lt; alerta &lt; perigo. Medições acima desses limites geram alertas automaticamente.</small>
+      <small className="muted">Os limites precisam crescer: atenção, depois alerta, depois perigo. Leituras acima de cada um abrem o alerta correspondente.</small>
       <Submit busy={busy}>Cadastrar sensor</Submit>
     </form>
   )
@@ -219,7 +219,7 @@ function FormEditarRegiao({ regioes, onSaved }) {
   }
 
   return (
-    <form className="card form" onSubmit={submit} noValidate id="form-editar">
+    <form className="form bloco" onSubmit={submit} noValidate id="form-editar">
       <h3>Editar região</h3>
       <Field label="Selecione a região">
         <select value={id} onChange={(e) => setId(e.target.value)}>
@@ -251,7 +251,7 @@ export default function Cadastro() {
   const { data, error, loading, reload } = useLoad(() => Api.regioes(), [])
   return (
     <>
-      <Header title="Cadastro" subtitle="Área do administrador" />
+      <Header title="Cadastro" subtitle="Somente administradores" />
       <div className="segmented" role="tablist">
         {[['regiao', 'Nova região'], ['sensor', 'Novo sensor'], ['editar', 'Editar região']].map(([k, l]) => (
           <button key={k} role="tab" aria-selected={aba === k} className={aba === k ? 'on' : ''} onClick={() => setAba(k)}>{l}</button>

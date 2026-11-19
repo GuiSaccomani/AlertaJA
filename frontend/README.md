@@ -48,12 +48,21 @@ Na tela de login, os botões "Administrador" e "Cidadã (Maria)" preenchem o for
 | # | Tela | API consumida | Perfil |
 |---|---|---|---|
 | 1 | **Login**: valida campos e mostra o erro 401 da API | `POST /api/auth/login` | todos |
-| 2 | **Painel**: maior risco, contagem por nível, alertas ativos e regiões. Atualiza sozinho a cada 10 s e tem botão de atualizar | `GET /api/regioes`, `GET /api/alertas` | todos |
+| 2 | **Painel**: régua com o maior risco e a região afetada, resumo por nível, alertas ativos e regiões. Atualiza sozinho a cada 10 s e tem botão de atualizar | `GET /api/regioes`, `GET /api/alertas` | todos |
 | 3 | **Alertas**: abas Ativos e Resolvidos | `GET /api/alertas` | todos |
 | 4 | **Detalhe do alerta**: nível, status, região, sensor e datas. Excluir com confirmação | `GET /api/alertas/{id}`, `DELETE /api/alertas/{id}` | excluir: admin |
 | 5 | **Detalhe da região**: sensores, última leitura, mini-gráfico com as faixas de limite e histórico | `GET /api/regioes/{id}`, `/api/sensores`, `/api/medicoes` | todos |
 | 6 | **Cadastro**: nova região, novo sensor (limites atenção < alerta < perigo) e editar ou desativar região | `POST /api/regioes`, `POST /api/sensores`, `PUT /api/regioes/{id}` | admin |
-| 7 | **Perfil**: dados do usuário, papel, validade do token, teste de conexão e sair | `GET /api/status` | todos |
+| 7 | **Perfil**: dados do usuário, papel, validade do token, tema (claro, escuro ou igual ao sistema), teste de conexão e sair | `GET /api/status` | todos |
+
+## Identidade visual
+
+- **Régua linimétrica:** a régua listrada usada para medir a cheia dos rios é o elemento central. No topo do painel e dos detalhes, a água sobe até a faixa do nível atual; nas listas, uma mini-régua de 4 degraus indica o nível.
+- **Logo oficial** do AlertaJá (`public/logo-alertaja.png` e a versão para fundo escuro `public/logo-alertaja-escuro.png`); o símbolo é o favicon.
+- **Cores:** fundo de várzea, tinta azul-leito e o azul da logo como cor de marca; a escala de risco (verde, amarelo, laranja, vermelho) é a única cor forte.
+- **Tipografia:** Atkinson Hyperlegible no texto (feita para máxima legibilidade) e Barlow Condensed nos números e títulos. As fontes vêm do npm (`@fontsource`), então o app funciona sem internet.
+- **Modo escuro:** segue o tema do sistema ou a escolha feita no Perfil (salva no navegador).
+- Movimento só na subida da água ao abrir a tela, desligado quando o sistema pede menos movimento.
 
 ## Tratamento de erros e usabilidade
 
@@ -85,8 +94,9 @@ frontend/
     ├── context.jsx         # sessão, toasts, estado de conexão
     ├── hooks.js            # useLoad (carregamento + auto-refresh)
     ├── format.js           # níveis de risco, datas pt-BR, rótulos
+    ├── theme.js            # tema claro/escuro
     ├── styles.css          # estilos (sem bibliotecas de UI)
-    ├── components/ui.jsx   # Badge, Header, Toasts, Dialog, Sparkline, estados
+    ├── components/ui.jsx   # Logo, Régua, marca de nível, Header, Toasts, Dialog, gráfico, estados
     └── pages/              # Login, Painel, Alertas, AlertaDetalhe, RegiaoDetalhe, Cadastro, Perfil
 ```
 

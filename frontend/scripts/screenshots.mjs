@@ -211,6 +211,26 @@ try {
   await page.waitForSelector('.ok-text, .error-text', { timeout: 10000 })
   await shot('09_perfil', 'perfil do administrador')
 
+  // 9b. Modo escuro (escolhido no Perfil, salvo no navegador)
+  await clickText('Escuro', '.tema-opcoes button')
+  await sleep(300)
+  await shot('09b_perfil_escuro', 'tema escuro selecionado')
+  await clickText('Painel', '.tabbar a')
+  await waitText('Regiões monitoradas')
+  await sleep(1400)
+  await shot('14_painel_escuro', 'painel no modo escuro')
+  const perigoReg = (await apiGet('/api/regioes')).find((r) => r.ativo && r.nivelRiscoAtual !== 'NORMAL')
+  if (perigoReg) {
+    await page.goto(`${BASE}/#/regioes/${perigoReg.id}`, { waitUntil: 'networkidle0' })
+    await page.waitForSelector('.sensor-card', { timeout: 15000 })
+    await sleep(1400)
+    await scrollScreen(330)
+    await shot('15_regiao_escuro', 'detalhe da região no modo escuro')
+  }
+  await page.goto(`${BASE}/#/perfil`, { waitUntil: 'networkidle0' })
+  await clickText('Igual ao sistema', '.tema-opcoes button')
+  await sleep(200)
+
   // 10/11. Cidadã: sem aba Cadastro e sem botão Excluir
   await clickText('Sair da conta', 'button')
   await page.waitForSelector('.login')

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Navigate, NavLink, Route, Routes, useLocation } from 'react-router-dom'
 import { AppProvider, useApp } from './context.jsx'
 import { Api } from './api.js'
-import { OfflineBanner, Toasts } from './components/ui.jsx'
+import { Logo, NivelBadge, OfflineBanner, Toasts } from './components/ui.jsx'
 import Login from './pages/Login.jsx'
 import Painel from './pages/Painel.jsx'
 import Alertas from './pages/Alertas.jsx'
@@ -10,6 +10,7 @@ import AlertaDetalhe from './pages/AlertaDetalhe.jsx'
 import RegiaoDetalhe from './pages/RegiaoDetalhe.jsx'
 import Cadastro from './pages/Cadastro.jsx'
 import Perfil from './pages/Perfil.jsx'
+import { ORIENTACAO } from './format.js'
 
 function StatusBar() {
   const [now, setNow] = useState(new Date())
@@ -29,19 +30,26 @@ function StatusBar() {
   )
 }
 
+const ICONES = {
+  painel: <><path d="M5 21V8M9.5 21V4M14 21v-9M18.5 21v-6" /></>,
+  alertas: <><path d="M12 4 2.8 19.5h18.4Z" /><path d="M12 10v4.5M12 17.2v.1" /></>,
+  cadastro: <><path d="M12 5v14M5 12h14" /></>,
+  perfil: <><circle cx="12" cy="8.5" r="3.8" /><path d="M4.5 20.5c1.2-3.6 4-5.5 7.5-5.5s6.3 1.9 7.5 5.5" /></>,
+}
+
 function TabBar() {
   const { isAdmin } = useApp()
   const tabs = [
-    { to: '/painel', label: 'Painel', icon: <path d="M3 11 12 3l9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z" /> },
-    { to: '/alertas', label: 'Alertas', icon: <path d="M12 3a6 6 0 0 0-6 6v4l-2 3h16l-2-3V9a6 6 0 0 0-6-6Zm-2 15a2 2 0 0 0 4 0" /> },
-    ...(isAdmin ? [{ to: '/cadastro', label: 'Cadastro', icon: <path d="M12 5v14M5 12h14" /> }] : []),
-    { to: '/perfil', label: 'Perfil', icon: <path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm-7 9a7 7 0 0 1 14 0" /> },
+    { to: '/painel', label: 'Painel', icon: ICONES.painel },
+    { to: '/alertas', label: 'Alertas', icon: ICONES.alertas },
+    ...(isAdmin ? [{ to: '/cadastro', label: 'Cadastro', icon: ICONES.cadastro }] : []),
+    { to: '/perfil', label: 'Perfil', icon: ICONES.perfil },
   ]
   return (
     <nav className="tabbar" aria-label="Navegação principal">
       {tabs.map((t) => (
         <NavLink key={t.to} to={t.to} className={({ isActive }) => `tab ${isActive ? 'active' : ''}`}>
-          <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">{t.icon}</svg>
+          <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">{t.icon}</svg>
           <span>{t.label}</span>
         </NavLink>
       ))}
@@ -54,6 +62,21 @@ function Protected({ children, admin }) {
   if (!session) return <Navigate to="/login" replace />
   if (admin && !isAdmin) return <Navigate to="/painel" replace />
   return children
+}
+
+function Legenda() {
+  return (
+    <aside className="stage-info">
+      <Logo height={58} />
+      <p className="stage-lede">Leituras de pluviômetros e de sensores de nível de rio, transformadas em aviso para quem mora perto da água.</p>
+      <dl className="legenda">
+        {['NORMAL', 'ATENCAO', 'ALERTA', 'PERIGO'].map((n) => (
+          <div key={n}><dt><NivelBadge nivel={n} /></dt><dd>{ORIENTACAO[n]}</dd></div>
+        ))}
+      </dl>
+      <p className="stage-foot">Global Solution 2026/2, FIAP. Dados de sensores simulados.</p>
+    </aside>
+  )
 }
 
 function Shell() {
@@ -71,15 +94,7 @@ function Shell() {
 
   return (
     <div className="stage">
-      <aside className="stage-info">
-        <h2>AlertaJá</h2>
-        <p>Monitoramento de chuvas e nível de rios com alertas à população.</p>
-        <ul>
-          <li>Frontend React consumindo a API ASP.NET Core</li>
-          <li>Dados de sensores IoT simulados em tempo real</li>
-          <li>Perfis: administrador e cidadão</li>
-        </ul>
-      </aside>
+      <Legenda />
       <div className="phone">
         <div className="phone-screen">
           <StatusBar />

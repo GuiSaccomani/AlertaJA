@@ -3,8 +3,15 @@ import { Link } from 'react-router-dom'
 import { Api } from '../api.js'
 import { useApp } from '../context.jsx'
 import { useLoad } from '../hooks.js'
-import { hora, nivelInfo, nomeRegiao, ORIENTACAO, relativo } from '../format.js'
-import { Empty, ErrorBox, Header, NivelBadge, Skeleton, Tag } from '../components/ui.jsx'
+import { hora, nivelInfo, NIVEIS, ORIENTACAO, relativo } from '../format.js'
+import { Empty, ErrorBox, Header, NivelBadge, RefreshButton, Regua, Skeleton, Tag } from '../components/ui.jsx'
+
+const ORDEM = ['PERIGO', 'ALERTA', 'ATENCAO', 'NORMAL']
+
+function resumo(contagem, total) {
+  const partes = ORDEM.filter((n) => contagem[n]).map((n) => `${contagem[n]} em ${NIVEIS[n].label.toLowerCase()}`)
+  return `${total} ${total === 1 ? 'região monitorada' : 'regiões monitoradas'}: ${partes.join(', ')}.`
+}
 
 export default function Painel() {
   const { session } = useApp()
@@ -21,6 +28,7 @@ export default function Painel() {
   const view = useMemo(() => {
     if (!data) return null
     const porId = Object.fromEntries(data.regioes.map((r) => [r.id, r]))
+    const ativasR = data.regioes.filter((r) => r.ativo)
     const ativos = data.alertas.filter((a) => a.ativo)
       .map((a) => ({ ...a, regiao: porId[a.regiaoId] }))
       .sort((a, b) => nivelInfo(b.nivel).ordem - nivelInfo(a.nivel).ordem)
@@ -28,37 +36,47 @@ export default function Painel() {
       .filter((r) => mostrarInativas || r.ativo)
       .sort((a, b) => (b.ativo - a.ativo) || nivelInfo(b.nivelRiscoAtual).ordem - nivelInfo(a.nivelRiscoAtual).ordem)
     const contagem = { NORMAL: 0, ATENCAO: 0, ALERTA: 0, PERIGO: 0 }
-    data.regioes.filter((r) => r.ativo).forEach((r) => { contagem[r.nivelRiscoAtual] = (contagem[r.nivelRiscoAtual] || 0) + 1 })
-    const pior = data.regioes.filter((r) => r.ativo).reduce((p, r) => (nivelInfo(r.nivelRiscoAtual).ordem > nivelInfo(p).ordem ? r.nivelRiscoAtual : p), 'NORMAL')
-    const inativas = data.regioes.filter((r) => !r.ativo).length
-    return { ativos, regioes, contagem, pior, inativas }
+    ativasR.forEach((r) => { contagem[r.nivelRiscoAtual] = (contagem[r.nivelRiscoAtual] || 0) + 1 })
+    const critica = [...ativasR].sort((a, b) => nivelInfo(b.nivelRiscoAtual).ordem - nivelInfo(a.nivelRiscoAtual).ordem)[0]
+    const inativas = data.regioes.length - ativasR.length
+    return { ativos, regioes, contagem, critica, total: ativasR.length, inativas }
   }, [data, mostrarInativas])
+
+  const pior = view?.critica?.nivelRiscoAtual || 'NORMAL'
 
   return (
     <>
       <Header
         title={`Olá, ${session.nome.split(' ')[0]}`}
-        subtitle={updatedAt ? `Atualizado às ${hora(updatedAt)} · auto 10s` : 'Carregando…'}
-        right={<button className="icon-btn" aria-label="Atualizar" onClick={() => reload()} title="Atualizar">⟳</button>}
+        subtitle={updatedAt ? `Atualizado às ${hora(updatedAt)}` : 'Buscando dados'}
+        right={<RefreshButton onClick={() => reload()} />}
       />
       <div className="content">
         <ErrorBox error={error} onRetry={reload} />
         {loading && !data && <Skeleton lines={4} />}
         {view && (
           <>
-            <section className={`hero-risk hero-${nivelInfo(view.pior).cls}`}>
-              <span className="hero-label">Maior risco monitorado</span>
-              <strong>{nivelInfo(view.pior).label}</strong>
-              <p>{ORIENTACAO[view.pior]}</p>
+            <section className={`hero hero-${nivelInfo(pior).cls}`}>
+              <Regua nivel={pior} height={176} />
+              <div className="hero-texto">
+                <p className="hero-nivel">{nivelInfo(pior).label}</p>
+                {view.critica && pior !== 'NORMAL'
+                  ? <Link to={`/regioes/${view.critica.id}`} className="hero-lugar">{view.critica.nome}, {view.critica.cidade}</Link>
+                  : <p className="hero-lugar">em todas as regiões</p>}
+                <p className="hero-orientacao">{ORIENTACAO[pior]}</p>
+                {(pior === 'PERIGO' || pior === 'ALERTA') && (
+                  <a className="btn-ligar" href="tel:199">Ligar para a Defesa Civil (199)</a>
+                )}
+              </div>
             </section>
 
-            <section className="stats">
-              {['PERIGO', 'ALERTA', 'ATENCAO', 'NORMAL'].map((n) => (
-                <div key={n} className={`stat stat-${nivelInfo(n).cls}`}>
-                  <b>{view.contagem[n] || 0}</b>
-                  <span>{nivelInfo(n).label}</span>
-                </div>
-              ))}
+            <section className="resumo" aria-label="Distribuição das regiões por nível">
+              <div className="resumo-barra">
+                {ORDEM.map((n) => view.contagem[n] > 0 && (
+                  <span key={n} className={`seg seg-${nivelInfo(n).cls}`} style={{ flexGrow: view.contagem[n] }} title={`${view.contagem[n]} ${NIVEIS[n].label}`} />
+                ))}
+              </div>
+              <p>{resumo(view.contagem, view.total)}</p>
             </section>
 
             <div className="section-head">
@@ -66,20 +84,22 @@ export default function Painel() {
               <Link to="/alertas" className="link">Ver todos</Link>
             </div>
             {view.ativos.length === 0 ? (
-              <Empty icon="✅" title="Nenhum alerta ativo" text="Todas as regiões monitoradas estão em condição normal." />
+              <Empty title="Nenhum alerta ativo" text="Os sensores estão abaixo do limite de atenção em todas as regiões." />
             ) : (
-              <div className="list">
+              <ul className="rows">
                 {view.ativos.slice(0, 4).map((a) => (
-                  <Link key={a.id} to={`/alertas/${a.id}`} className={`card alert-card edge-${nivelInfo(a.nivel).cls}`}>
-                    <div className="row-between">
-                      <strong>{a.titulo}</strong>
+                  <li key={a.id}>
+                    <Link to={`/alertas/${a.id}`} className={`row alert-card risco-${nivelInfo(a.nivel).cls}`}>
+                      <div className="row-main">
+                        <strong>{a.titulo}</strong>
+                        <span>{a.regiao ? `${a.regiao.nome}, ${a.regiao.cidade}` : a.nomeRegiao}</span>
+                        <small>Sensor {a.codigoIdentificador}, {relativo(a.dataUltimaOcorrencia || a.dataEmissao)}</small>
+                      </div>
                       <NivelBadge nivel={a.nivel} />
-                    </div>
-                    <span className="muted">{a.regiao ? nomeRegiao(a.regiao) : a.nomeRegiao} · sensor {a.codigoIdentificador}</span>
-                    <span className="muted small">Última ocorrência {relativo(a.dataUltimaOcorrencia || a.dataEmissao)}</span>
-                  </Link>
+                    </Link>
+                  </li>
                 ))}
-              </div>
+              </ul>
             )}
 
             <div className="section-head">
@@ -92,24 +112,22 @@ export default function Painel() {
               )}
             </div>
             {view.regioes.length === 0 ? (
-              <Empty icon="🗺️" title="Nenhuma região cadastrada" />
+              <Empty title="Nenhuma região cadastrada" text="O administrador cadastra regiões na aba Cadastro." />
             ) : (
-              <div className="list">
+              <ul className="rows">
                 {view.regioes.map((r) => (
-                  <Link key={r.id} to={`/regioes/${r.id}`} className={`card region-card ${r.ativo ? '' : 'is-inactive'}`}>
-                    <div>
-                      <strong>{r.nome}</strong>
-                      <span className="muted">{r.cidade}/{r.estado}</span>
-                    </div>
-                    <div className="region-right">
-                      {!r.ativo && <Tag>inativa</Tag>}
-                      <NivelBadge nivel={r.nivelRiscoAtual} />
-                    </div>
-                  </Link>
+                  <li key={r.id}>
+                    <Link to={`/regioes/${r.id}`} className={`row region-card ${r.ativo ? '' : 'is-inactive'}`}>
+                      <div className="row-main">
+                        <strong>{r.nome}</strong>
+                        <span>{r.cidade}/{r.estado}</span>
+                      </div>
+                      {r.ativo ? <NivelBadge nivel={r.nivelRiscoAtual} /> : <Tag>Inativa</Tag>}
+                    </Link>
+                  </li>
                 ))}
-              </div>
+              </ul>
             )}
-            <p className="hint">Toque em uma região para ver os sensores e as últimas medições recebidas dos dispositivos IoT.</p>
           </>
         )}
       </div>
