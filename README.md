@@ -276,6 +276,7 @@ python validar_scripts.py validacao.log
 * [`docs/entrega/AlertaJa_Documentacao_Global_Solution.pdf`](docs/entrega/AlertaJa_Documentacao_Global_Solution.pdf): documento com problema, arquitetura, banco, API, segurança, frontend, IoT, plano de testes, ODS e uso de IA.
 * [`docs/entrega/PRINTS.pdf`](docs/entrega/PRINTS.pdf) e [`docs/entrega/Evidencias_Testes_API.pdf`](docs/entrega/Evidencias_Testes_API.pdf): evidências de execução.
 * [`docs/entrega/Guia_de_Entrega_AlertaJa.pdf`](docs/entrega/Guia_de_Entrega_AlertaJa.pdf): guia da estrutura da entrega.
+* [`docs/evidencias/`](docs/evidencias/): prints (frontend, API, IoT e banco), logs de execução, relatórios Newman e `resultados.csv`.
 * [`docs/banco-de-dados/`](docs/banco-de-dados/): `db_ddl.sql`, `db_dml.sql`, `script_completo.sql`, `consultas.sql`, DER (`der.png`, `der_diagram.md`).
 * [`docs/arquitetura/arquitetura.md`](docs/arquitetura/arquitetura.md): engenharia e fluxos do sistema.
 * [`docs/testes-e-cenarios/cenarios_de_teste.md`](docs/testes-e-cenarios/cenarios_de_teste.md): matriz dos 49 casos de teste.

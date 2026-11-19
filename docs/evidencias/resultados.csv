@@ -1,0 +1,50 @@
+﻿id;caso_de_teste;modulo;metodo;endpoint;status_esperado;exec1_status_obtido;exec1_resultado;exec2_status_obtido;exec2_resultado;exec2_tempo_ms;assercoes_exec2
+CT01;Status da API;Status;GET;/api/status;200;200;PASS;200;PASS;34;2/2
+CT02;Login administrador (válido);Autenticação;POST;/api/auth/login;200;200;PASS;200;PASS;1307;4/4
+CT03;Login cidadão (válido);Autenticação;POST;/api/auth/login;200;200;PASS;200;PASS;103;2/2
+CT04;Login com senha incorreta;Autenticação;POST;/api/auth/login;401;401;PASS;401;PASS;117;2/2
+CT05;Login com e-mail inexistente;Autenticação;POST;/api/auth/login;401;401;PASS;401;PASS;12;2/2
+CT06;Tentativa de SQL Injection no login;Autenticação;POST;/api/auth/login;401;401;PASS;401;PASS;11;1/1
+CT07;Login com corpo inválido (email nulo);Autenticação;POST;/api/auth/login;400;400;PASS;400;PASS;15;1/1
+CT08;Listar regiões;Regiões;GET;/api/regioes;200;200;PASS;200;PASS;42;2/2
+CT09;Obter região por id;Regiões;GET;/api/regioes/bea18d4e-5c6d-40f0-8ff0-e6da0e8cf625;200;200;PASS;200;PASS;20;2/2
+CT10;Obter região inexistente;Regiões;GET;/api/regioes/00000000-0000-0000-0000-000000000001;404;404;PASS;404;PASS;12;1/1
+CT11;Criar região sem token;Regiões;POST;/api/regioes;401;401;PASS;401;PASS;7;1/1
+CT12;Criar região como cidadão;Regiões;POST;/api/regioes;403;403;PASS;403;PASS;33;1/1
+CT13;Criar região com dados inválidos;Regiões;POST;/api/regioes;400;400;PASS;400;PASS;10;2/2
+CT14;Criar região (admin);Regiões;POST;/api/regioes;201;201;FAIL;201;PASS;189;5/5
+CT15;Atualizar região (admin);Regiões;PUT;/api/regioes/162136af-6e9d-4c1d-82d6-17ce648c59c2;200;200;FAIL;200;PASS;54;3/3
+CT16;Atualizar região inexistente;Regiões;PUT;/api/regioes/00000000-0000-0000-0000-000000000001;404;404;PASS;404;PASS;8;1/1
+CT17;Listar sensores;Sensores;GET;/api/sensores;200;200;PASS;200;PASS;34;2/2
+CT18;Obter sensor por id;Sensores;GET;/api/sensores/e39ad137-24d6-4153-bc03-92ab5ad529de;200;200;PASS;200;PASS;22;2/2
+CT19;Obter sensor inexistente;Sensores;GET;/api/sensores/00000000-0000-0000-0000-000000000001;404;404;PASS;404;PASS;8;1/1
+CT20;Criar sensor como cidadão;Sensores;POST;/api/sensores;403;403;PASS;403;PASS;4;1/1
+CT21;Criar sensor com limites fora de ordem;Sensores;POST;/api/sensores;400;500;FAIL;400;PASS;27;2/2
+CT22;Criar sensor (admin);Sensores;POST;/api/sensores;201;201;PASS;201;PASS;132;2/2
+CT23;Criar sensor com código duplicado;Sensores;POST;/api/sensores;409;500;FAIL;409;PASS;19;1/1
+CT24;Atualizar sensor sem token;Sensores;PUT;/api/sensores/ce894934-2a41-48ea-9920-aaca7ab3c903;401;401;PASS;401;PASS;5;1/1
+CT25;Atualizar sensor (admin);Sensores;PUT;/api/sensores/ce894934-2a41-48ea-9920-aaca7ab3c903;200;200;PASS;200;PASS;58;2/2
+CT26;Enviar medição sem API Key;Medições e geração de alertas;POST;/api/medicoes;401;401;PASS;401;PASS;8;1/1
+CT27;Enviar medição com API Key inválida;Medições e geração de alertas;POST;/api/medicoes;401;401;PASS;401;PASS;3;1/1
+CT28;Enviar medição com valor negativo;Medições e geração de alertas;POST;/api/medicoes;400;400;PASS;400;PASS;6;2/2
+CT29;Enviar medição para sensor inexistente;Medições e geração de alertas;POST;/api/medicoes;400;400;PASS;400;PASS;11;2/2
+CT30;Medição NORMAL (5 mm);Medições e geração de alertas;POST;/api/medicoes;201;201;PASS;201;PASS;115;1/1
+CT31;Região permanece NORMAL;Medições e geração de alertas;GET;/api/regioes/162136af-6e9d-4c1d-82d6-17ce648c59c2;200;200;PASS;200;PASS;7;2/2
+CT32;Medição de PERIGO (72,5 mm);Medições e geração de alertas;POST;/api/medicoes;201;201;PASS;201;PASS;59;1/1
+CT33;Região elevada para PERIGO;Medições e geração de alertas;GET;/api/regioes/162136af-6e9d-4c1d-82d6-17ce648c59c2;200;200;PASS;200;PASS;13;2/2
+CT34;Alerta PERIGO criado automaticamente;Medições e geração de alertas;GET;/api/alertas;200;200;PASS;200;PASS;58;3/3
+CT35;Listar medições;Medições e geração de alertas;GET;/api/medicoes;200;200;PASS;200;PASS;25;2/2
+CT36;Obter medição por id;Medições e geração de alertas;GET;/api/medicoes/b3b3e269-42b8-47e0-9aa5-d472ab57437a;200;200;PASS;200;PASS;17;2/2
+CT37;Obter medição inexistente;Medições e geração de alertas;GET;/api/medicoes/00000000-0000-0000-0000-000000000001;404;404;PASS;404;PASS;6;1/1
+CT38;Medição volta ao normal (4 mm);Medições e geração de alertas;POST;/api/medicoes;201;201;PASS;201;PASS;35;1/1
+CT39;Alerta resolvido automaticamente;Medições e geração de alertas;GET;/api/alertas/88cc153c-f4bd-472c-abc7-54c402112b10;200;200;PASS;200;PASS;25;3/3
+CT40;Região volta para NORMAL;Medições e geração de alertas;GET;/api/regioes/162136af-6e9d-4c1d-82d6-17ce648c59c2;200;200;PASS;200;PASS;11;2/2
+CT41;Listar alertas;Alertas;GET;/api/alertas;200;200;PASS;200;PASS;34;2/2
+CT42;Obter alerta inexistente;Alertas;GET;/api/alertas/00000000-0000-0000-0000-000000000001;404;404;PASS;404;PASS;6;1/1
+CT43;Excluir alerta sem token;Alertas;DELETE;/api/alertas/88cc153c-f4bd-472c-abc7-54c402112b10;401;401;PASS;401;PASS;2;1/1
+CT44;Excluir alerta como cidadão;Alertas;DELETE;/api/alertas/88cc153c-f4bd-472c-abc7-54c402112b10;403;403;PASS;403;PASS;2;1/1
+CT45;Excluir alerta com token adulterado;Alertas;DELETE;/api/alertas/88cc153c-f4bd-472c-abc7-54c402112b10;401;401;PASS;401;PASS;4;1/1
+CT46;Excluir alerta (admin);Alertas;DELETE;/api/alertas/88cc153c-f4bd-472c-abc7-54c402112b10;204;204;PASS;204;PASS;40;1/1
+CT47;Excluir alerta já excluído;Alertas;DELETE;/api/alertas/88cc153c-f4bd-472c-abc7-54c402112b10;404;404;PASS;404;PASS;8;1/1
+CT48;Desativar sensor de teste;Limpeza;PUT;/api/sensores/ce894934-2a41-48ea-9920-aaca7ab3c903;200;200;PASS;200;PASS;36;2/2
+CT49;Desativar região de teste;Limpeza;PUT;/api/regioes/162136af-6e9d-4c1d-82d6-17ce648c59c2;200;200;PASS;200;PASS;20;1/1
