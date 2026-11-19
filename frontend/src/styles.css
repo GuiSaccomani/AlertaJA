@@ -371,3 +371,9 @@ a.hero-lugar { text-decoration: underline; text-decoration-thickness: 1px; text-
 [data-theme="dark"] .toast { box-shadow: 0 6px 18px rgb(0 0 0 / 50%); }
 [data-theme="dark"] .dialog-backdrop { background: rgb(0 0 0 / 60%); }
 [data-theme="dark"] .faixa-atencao, [data-theme="dark"] .faixa-alerta, [data-theme="dark"] .faixa-perigo { opacity: .16; }
+
+/* ---------- Simplificação ---------- */
+.faixa-alertas { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid var(--margem); font-weight: 700; color: var(--correnteza); }
+.faixa-alertas::after { content: ""; width: 8px; height: 8px; border-right: 2px solid currentColor; border-top: 2px solid currentColor; transform: rotate(45deg); margin-right: 4px; }
+.history .sparkline { margin: 10px 0 2px; }
+.stage-info .stage-lede { margin-top: 18px; }

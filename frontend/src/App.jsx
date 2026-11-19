@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Navigate, NavLink, Route, Routes, useLocation } from 'react-router-dom'
 import { AppProvider, useApp } from './context.jsx'
 import { Api } from './api.js'
-import { Logo, NivelBadge, OfflineBanner, Toasts } from './components/ui.jsx'
+import { Logo, OfflineBanner, Toasts } from './components/ui.jsx'
 import Login from './pages/Login.jsx'
 import Painel from './pages/Painel.jsx'
 import Alertas from './pages/Alertas.jsx'
@@ -10,7 +10,6 @@ import AlertaDetalhe from './pages/AlertaDetalhe.jsx'
 import RegiaoDetalhe from './pages/RegiaoDetalhe.jsx'
 import Cadastro from './pages/Cadastro.jsx'
 import Perfil from './pages/Perfil.jsx'
-import { ORIENTACAO } from './format.js'
 
 function StatusBar() {
   const [now, setNow] = useState(new Date())
@@ -69,11 +68,6 @@ function Legenda() {
     <aside className="stage-info">
       <Logo height={58} />
       <p className="stage-lede">Leituras de pluviômetros e de sensores de nível de rio, transformadas em aviso para quem mora perto da água.</p>
-      <dl className="legenda">
-        {['NORMAL', 'ATENCAO', 'ALERTA', 'PERIGO'].map((n) => (
-          <div key={n}><dt><NivelBadge nivel={n} /></dt><dd>{ORIENTACAO[n]}</dd></div>
-        ))}
-      </dl>
       <p className="stage-foot">Global Solution 2026/2, FIAP. Dados de sensores simulados.</p>
     </aside>
   )

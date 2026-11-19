@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Api } from '../api.js'
 import { useLoad } from '../hooks.js'
-import { dataHora, hora, nivelInfo, relativo, STATUS_ALERTA } from '../format.js'
+import { dataHora, hora, nivelInfo, relativo } from '../format.js'
 import { Empty, ErrorBox, Header, NivelBadge, RefreshButton, Skeleton } from '../components/ui.jsx'
 
 export default function Alertas() {
@@ -54,12 +54,10 @@ export default function Alertas() {
               <Link to={`/alertas/${a.id}`} className={`row alert-card risco-${nivelInfo(a.nivel).cls} ${a.ativo ? '' : 'is-resolved'}`}>
                 <div className="row-main">
                   <strong>{a.titulo}</strong>
-                  <span>{a.regiao ? `${a.regiao.nome}, ${a.regiao.cidade}/${a.regiao.estado}` : a.nomeRegiao}</span>
-                  <small>
-                    {a.ativo
-                      ? `Emitido em ${dataHora(a.dataEmissao)}, última leitura ${relativo(a.dataUltimaOcorrencia || a.dataEmissao)}`
-                      : `${STATUS_ALERTA[a.status] || a.status} em ${dataHora(a.dataResolucao)}`}
-                  </small>
+                  <span>
+                    {a.regiao ? `${a.regiao.nome}, ${a.regiao.cidade}` : a.nomeRegiao}
+                    {a.ativo ? `, ${relativo(a.dataUltimaOcorrencia || a.dataEmissao)}` : `, encerrado em ${dataHora(a.dataResolucao).slice(0, 10)}`}
+                  </span>
                 </div>
                 <NivelBadge nivel={a.nivel} />
               </Link>

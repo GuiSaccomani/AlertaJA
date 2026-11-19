@@ -48,10 +48,10 @@ Na tela de login, os botões "Administrador" e "Cidadã (Maria)" preenchem o for
 | # | Tela | API consumida | Perfil |
 |---|---|---|---|
 | 1 | **Login**: valida campos e mostra o erro 401 da API | `POST /api/auth/login` | todos |
-| 2 | **Painel**: régua com o maior risco e a região afetada, resumo por nível, alertas ativos e regiões. Atualiza sozinho a cada 10 s e tem botão de atualizar | `GET /api/regioes`, `GET /api/alertas` | todos |
+| 2 | **Painel**: régua com o maior risco e a região afetada, atalho para os alertas ativos e lista de regiões. Atualiza sozinho a cada 10 s e tem botão de atualizar | `GET /api/regioes`, `GET /api/alertas` | todos |
 | 3 | **Alertas**: abas Ativos e Resolvidos | `GET /api/alertas` | todos |
 | 4 | **Detalhe do alerta**: nível, status, região, sensor e datas. Excluir com confirmação | `GET /api/alertas/{id}`, `DELETE /api/alertas/{id}` | excluir: admin |
-| 5 | **Detalhe da região**: sensores, última leitura, mini-gráfico com as faixas de limite e histórico | `GET /api/regioes/{id}`, `/api/sensores`, `/api/medicoes` | todos |
+| 5 | **Detalhe da região**: sensores, última leitura, escala com os limites e histórico com gráfico | `GET /api/regioes/{id}`, `/api/sensores`, `/api/medicoes` | todos |
 | 6 | **Cadastro**: nova região, novo sensor (limites atenção < alerta < perigo) e editar ou desativar região | `POST /api/regioes`, `POST /api/sensores`, `PUT /api/regioes/{id}` | admin |
 | 7 | **Perfil**: dados do usuário, papel, validade do token, tema (claro, escuro ou igual ao sistema), teste de conexão e sair | `GET /api/status` | todos |
 

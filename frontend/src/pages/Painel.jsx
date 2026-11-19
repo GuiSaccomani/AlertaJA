@@ -3,15 +3,9 @@ import { Link } from 'react-router-dom'
 import { Api } from '../api.js'
 import { useApp } from '../context.jsx'
 import { useLoad } from '../hooks.js'
-import { hora, nivelInfo, NIVEIS, ORIENTACAO, relativo } from '../format.js'
+import { hora, nivelInfo, ORIENTACAO } from '../format.js'
 import { Empty, ErrorBox, Header, NivelBadge, RefreshButton, Regua, Skeleton, Tag } from '../components/ui.jsx'
 
-const ORDEM = ['PERIGO', 'ALERTA', 'ATENCAO', 'NORMAL']
-
-function resumo(contagem, total) {
-  const partes = ORDEM.filter((n) => contagem[n]).map((n) => `${contagem[n]} em ${NIVEIS[n].label.toLowerCase()}`)
-  return `${total} ${total === 1 ? 'região monitorada' : 'regiões monitoradas'}: ${partes.join(', ')}.`
-}
 
 export default function Painel() {
   const { session } = useApp()
@@ -64,43 +58,13 @@ export default function Painel() {
                   ? <Link to={`/regioes/${view.critica.id}`} className="hero-lugar">{view.critica.nome}, {view.critica.cidade}</Link>
                   : <p className="hero-lugar">em todas as regiões</p>}
                 <p className="hero-orientacao">{ORIENTACAO[pior]}</p>
-                {(pior === 'PERIGO' || pior === 'ALERTA') && (
-                  <a className="btn-ligar" href="tel:199">Ligar para a Defesa Civil (199)</a>
-                )}
+                {pior === 'PERIGO' && <a className="btn-ligar" href="tel:199">Ligar 199</a>}
               </div>
             </section>
 
-            <section className="resumo" aria-label="Distribuição das regiões por nível">
-              <div className="resumo-barra">
-                {ORDEM.map((n) => view.contagem[n] > 0 && (
-                  <span key={n} className={`seg seg-${nivelInfo(n).cls}`} style={{ flexGrow: view.contagem[n] }} title={`${view.contagem[n]} ${NIVEIS[n].label}`} />
-                ))}
-              </div>
-              <p>{resumo(view.contagem, view.total)}</p>
-            </section>
-
-            <div className="section-head">
-              <h2>Alertas ativos <span className="count">{view.ativos.length}</span></h2>
-              <Link to="/alertas" className="link">Ver todos</Link>
-            </div>
-            {view.ativos.length === 0 ? (
-              <Empty title="Nenhum alerta ativo" text="Os sensores estão abaixo do limite de atenção em todas as regiões." />
-            ) : (
-              <ul className="rows">
-                {view.ativos.slice(0, 4).map((a) => (
-                  <li key={a.id}>
-                    <Link to={`/alertas/${a.id}`} className={`row alert-card risco-${nivelInfo(a.nivel).cls}`}>
-                      <div className="row-main">
-                        <strong>{a.titulo}</strong>
-                        <span>{a.regiao ? `${a.regiao.nome}, ${a.regiao.cidade}` : a.nomeRegiao}</span>
-                        <small>Sensor {a.codigoIdentificador}, {relativo(a.dataUltimaOcorrencia || a.dataEmissao)}</small>
-                      </div>
-                      <NivelBadge nivel={a.nivel} />
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            )}
+            <Link to="/alertas" className="faixa-alertas">
+              {view.ativos.length === 0 ? 'Nenhum alerta ativo' : `Ver ${view.ativos.length === 1 ? 'o alerta ativo' : `os ${view.ativos.length} alertas ativos`}`}
+            </Link>
 
             <div className="section-head">
               <h2>Regiões monitoradas</h2>

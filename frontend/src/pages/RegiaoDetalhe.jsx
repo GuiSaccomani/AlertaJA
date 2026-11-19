@@ -114,11 +114,11 @@ export default function RegiaoDetalhe() {
                     <span>{s.unidadeMedida}</span>
                   </p>
                   <p className="leitura-quando">{ultima ? `Última leitura em ${dataHora(ultima.dataHora)}` : 'Ainda sem leituras'}</p>
-                  {serie.length > 1 && <Sparkline values={serie} sensor={s} />}
                   <Escala s={s} valor={ultima ? Number(ultima.valor) : undefined} />
                   {meds.length > 0 && (
                     <details className="history">
                       <summary>Últimas {Math.min(meds.length, 8)} leituras</summary>
+                      {serie.length > 1 && <Sparkline values={serie} sensor={s} />}
                       <ul>
                         {meds.slice(0, 8).map((m) => (
                           <li key={m.id}>
