@@ -73,7 +73,7 @@ flowchart LR
 ### Componentes Tecnológicos:
 * **Backend:** C# · ASP.NET Core 10 Web API · Entity Framework Core · Oracle.EntityFrameworkCore · JWT Bearer · `PasswordHasher` (ASP.NET Core Identity) · DotNetEnv · OpenAPI.
 * **Banco de Dados:** Oracle 19c (servidor `oracle.fiap.com.br`) com PK, FK, UNIQUE, CHECK e índices.
-* **Frontend:** React 18, Vite 5, React Router, CSS próprio. Identidade visual baseada na régua linimétrica (régua de medir cheia de rio), logo oficial, modo claro e escuro, layout mobile com moldura de smartphone no desktop e tela cheia no celular.
+* **Frontend:** React 18, Vite 5, React Router, CSS próprio. Identidade visual baseada na régua linimétrica (régua de medir cheia de rio), logo oficial, modo escuro como padrão (claro opcional no Perfil), layout mobile com moldura de smartphone no desktop e tela cheia no celular.
 * **Simulador de Sensores:** Python 3 com `requests` e `python-dotenv`, cenários controlados e modo contínuo.
 * **Testes:** Postman Collection com 49 casos e 83 asserções, executada por linha de comando com **Newman** (relatórios HTML/JUnit).
 

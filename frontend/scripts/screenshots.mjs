@@ -228,7 +228,7 @@ try {
     await shot('15_regiao_escuro', 'detalhe da região no modo escuro')
   }
   await page.goto(`${BASE}/#/perfil`, { waitUntil: 'networkidle0' })
-  await clickText('Igual ao sistema', '.tema-opcoes button')
+  await clickText('Escuro', '.tema-opcoes button')
   await sleep(200)
 
   // 10/11. Cidadã: sem aba Cadastro e sem botão Excluir

@@ -1,12 +1,12 @@
 // Tema claro/escuro. A preferência ('auto' | 'claro' | 'escuro') fica no
-// localStorage; em 'auto' o app segue o tema do sistema operacional.
+// localStorage. O padrão é o escuro; em 'auto' o app segue o sistema.
 const KEY = 'alertaja.tema'
 const media = typeof window !== 'undefined' && window.matchMedia
   ? window.matchMedia('(prefers-color-scheme: dark)')
   : null
 
 export function getPreferencia() {
-  try { return localStorage.getItem(KEY) || 'auto' } catch { return 'auto' }
+  try { return localStorage.getItem(KEY) || 'escuro' } catch { return 'escuro' }
 }
 
 function efetivo(pref) {

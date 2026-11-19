@@ -331,7 +331,7 @@ a.hero-lugar { text-decoration: underline; text-decoration-thickness: 1px; text-
 .login-topo p { margin-top: 0; }
 
 /* ---------- Aparência (Perfil) ---------- */
-.tema-opcoes { display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: 6px; margin-top: 10px; padding: 4px; border: 1.5px solid var(--margem); border-radius: 10px; }
+.tema-opcoes { display: grid; grid-template-columns: 1fr 1fr 1.4fr; gap: 6px; margin-top: 10px; padding: 4px; border: 1.5px solid var(--margem); border-radius: 10px; }
 .tema-opcoes button { background: none; border: 0; border-radius: 7px; padding: 9px 4px; font-size: 14px; font-weight: 700; color: var(--leito-2); }
 .tema-opcoes button.on { background: var(--primario); color: var(--primario-tx); }
 
@@ -348,9 +348,9 @@ a.hero-lugar { text-decoration: underline; text-decoration-thickness: 1px; text-
   --margem: #2C4250;
   --margem-2: #1C303B;
   --superficie: #0B1A22;
-  --primario: #E6EEF2;
-  --primario-tx: #0B1820;
-  --primario-ativo: #C9D6DD;
+  --primario: #1F63F5;
+  --primario-tx: #FFFFFF;
+  --primario-ativo: #174FCC;
   --normal: #4FB585;
   --atencao: #E8B93A;
   --atencao-tx: #F0C75A;

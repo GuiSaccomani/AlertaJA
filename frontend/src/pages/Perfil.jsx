@@ -45,7 +45,7 @@ export default function Perfil() {
         <section className="bloco">
           <h2 id="tema-titulo">Aparência</h2>
           <div className="tema-opcoes" role="radiogroup" aria-labelledby="tema-titulo">
-            {[['auto', 'Igual ao sistema'], ['claro', 'Claro'], ['escuro', 'Escuro']].map(([v, l]) => (
+            {[['escuro', 'Escuro'], ['claro', 'Claro'], ['auto', 'Igual ao sistema']].map(([v, l]) => (
               <button key={v} role="radio" aria-checked={tema === v} className={tema === v ? 'on' : ''}
                 onClick={() => { setTema(v); salvarPreferencia(v) }}>{l}</button>
             ))}

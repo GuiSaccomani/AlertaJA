@@ -61,7 +61,7 @@ Na tela de login, os botões "Administrador" e "Cidadã (Maria)" preenchem o for
 - **Logo oficial** do AlertaJá (`public/logo-alertaja.png` e a versão para fundo escuro `public/logo-alertaja-escuro.png`); o símbolo é o favicon.
 - **Cores:** fundo de várzea, tinta azul-leito e o azul da logo como cor de marca; a escala de risco (verde, amarelo, laranja, vermelho) é a única cor forte.
 - **Tipografia:** Atkinson Hyperlegible no texto (feita para máxima legibilidade) e Barlow Condensed nos números e títulos. As fontes vêm do npm (`@fontsource`), então o app funciona sem internet.
-- **Modo escuro:** segue o tema do sistema ou a escolha feita no Perfil (salva no navegador).
+- **Modo escuro como padrão:** o app abre no escuro; no Perfil dá para trocar para claro ou para "igual ao sistema" (escolha salva no navegador).
 - Movimento só na subida da água ao abrir a tela, desligado quando o sistema pede menos movimento.
 
 ## Tratamento de erros e usabilidade
